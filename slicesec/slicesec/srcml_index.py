@@ -7,6 +7,7 @@ stream extraction (cin >> s), each function's parameters in order and its line s
 """
 from __future__ import annotations
 
+import bisect
 import re
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
@@ -77,6 +78,30 @@ class Function:
     start: int
     end: int
     params: list[str]
+    ptr_params: set[str] = field(default_factory=set)   # declared as pointer, reference or array: written through
+
+
+@dataclass
+class Region:
+    """Statements control dependent on a predicate: a branch, loop body or case block, or the statements after an
+    if whose branch leaves the block (if (!ok) return; ...)."""
+    file: str
+    function: str
+    line: int                  # line of the predicate
+    names: set[str]            # variables the predicate reads
+    lines: set[int]            # start lines of the controlled statements
+
+
+@dataclass
+class Control:
+    """A control statement, for control-flow edges between slice lines (srcSlice's controledges)."""
+    file: str
+    function: str
+    kind: str                        # if, while, for, do, switch
+    header: int                      # line of the (first) predicate
+    branches: list[tuple[int, set[int]]]   # (predicate line, statement lines) of if / else if / loop body
+    else_lines: set[int]
+    end: int
 
 
 @dataclass
@@ -85,18 +110,31 @@ class Index:
     functions: list[Function] = field(default_factory=list)
     extractions: list[tuple[str, str, int, str, str]] = field(default_factory=list)  # file, func, line, stream, var
     returns: dict[tuple[str, str], set[str]] = field(default_factory=dict)  # (file, func) -> names in return exprs
+    regions: list[Region] = field(default_factory=list)
+    controls: list[Control] = field(default_factory=list)
+    exits: dict[str, set[int]] = field(default_factory=dict)   # file -> lines of return / throw statements
     languages: dict[str, str] = field(default_factory=dict)  # file -> srcML language
 
     def function_at(self, file: str, line: int) -> Function | None:
-        if not hasattr(self, "_by_file"):
-            self._by_file: dict[str, list[Function]] = {}
-            for f in self.functions:
-                self._by_file.setdefault(f.file, []).append(f)
-        best = None
-        for f in self._by_file.get(file, []):
-            if f.start <= line <= f.end and (best is None or f.start >= best.start):
-                best = f
-        return best
+        """The innermost function whose span holds the line (binary search over start lines)."""
+        by_file = self.__dict__.get("_by_file")
+        if by_file is None:
+            by_file = {}
+            for f in sorted(self.functions, key=lambda f: (f.start, -f.end)):
+                by_file.setdefault(f.file, []).append(f)
+            self._by_file = by_file
+            self._starts = {k: [f.start for f in v] for k, v in by_file.items()}
+        fs = by_file.get(file)
+        if not fs:
+            return None
+        i = bisect.bisect_right(self._starts[file], line) - 1
+        while i >= 0:                       # the latest start at or before the line that still contains it
+            if fs[i].start <= line <= fs[i].end:
+                return fs[i]
+            i -= 1
+            if i >= 0 and line - fs[i].end > 0 and all(g.end < line for g in fs[max(0, i - 3):i + 1]):
+                break
+        return None
 
     def functions_named(self, name: str) -> list[Function]:
         return [f for f in self.functions if f.name == name]
@@ -116,6 +154,95 @@ def _assign_target(expr_children: list[ET.Element], call: ET.Element) -> str | N
 # statements after which nothing later in the function runs (break, continue and goto only leave a loop or jump
 # within the function, so code after them can still run)
 JUMPS = {SRC + t for t in ("return", "throw", "raise")}
+LEAVES = {SRC + t for t in ("return", "throw", "raise", "break", "continue", "goto")}   # leave the block
+STMTS = {SRC + t for t in ("expr_stmt", "decl_stmt", "return", "break", "continue", "goto", "throw", "if_stmt",
+                           "while", "for", "do", "switch", "case", "default", "try", "catch", "assert", "with",
+                           "empty_stmt", "function_decl")}
+
+
+def _stmt_lines(e: ET.Element) -> set[int]:
+    return {_line(x) for x in e.iter() if x.tag in STMTS and _line(x)}
+
+
+def _block(e: ET.Element) -> ET.Element | None:
+    return e.find(SRC + "block")
+
+
+def _leaves(block: ET.Element | None) -> bool:
+    """The block's last statement leaves it: return, break, continue, goto, throw or a call that does not return."""
+    if block is None:
+        return False
+    bc = block.find(SRC + "block_content")
+    kids = [k for k in (list(bc) if bc is not None else list(block)) if k.tag in STMTS]
+    if not kids:
+        return False
+    last = kids[-1]
+    if last.tag in LEAVES:
+        return True
+    if last.tag == SRC + "expr_stmt":
+        c = last.find(f"{SRC}expr/{SRC}call")
+        n = c.find(SRC + "name") if c is not None else None
+        return n is not None and (_text(n) in EXITS or bool(NORETURN.search(_text(n).strip("()*"))))
+    return False
+
+
+def _controls(fname: str, func_of, unit: ET.Element) -> list[Control]:
+    out = []
+    for e in unit.iter():
+        if e.tag == SRC + "if_stmt":
+            branches, els = [], set()
+            for br in e:
+                if br.tag == SRC + "if" and _block(br) is not None:
+                    branches.append((_line(br), _stmt_lines(_block(br))))
+                elif br.tag == SRC + "else" and _block(br) is not None:
+                    els = _stmt_lines(_block(br))
+            if branches:
+                out.append(Control(fname, func_of(e), "if", branches[0][0], branches, els, _end(e)))
+        elif e.tag in (SRC + "while", SRC + "for", SRC + "do", SRC + "switch"):
+            b = _block(e)
+            hdr = e.find(SRC + "condition") if e.tag != SRC + "for" else e.find(SRC + "control")
+            if b is not None:
+                h = _line(hdr) if hdr is not None else _line(e)
+                out.append(Control(fname, func_of(e), e.tag[len(SRC):], h, [(h, _stmt_lines(b))], set(), _end(e)))
+    return out
+
+
+def _regions(fname: str, func_of, parent: dict, unit: ET.Element) -> list[Region]:
+    out = []
+    for e in unit.iter():
+        fn = func_of(e)
+        if e.tag == SRC + "if_stmt":
+            conds: set[str] = set()
+            has_else = e.find(SRC + "else") is not None
+            for br in e:
+                if br.tag == SRC + "if":
+                    c = br.find(SRC + "condition")
+                    conds = conds | set(_names(c)) if c is not None else conds
+                    b = _block(br)
+                    if b is not None:
+                        out.append(Region(fname, fn, _line(br), set(conds), _stmt_lines(b)))
+                    if not has_else and _leaves(b):    # if (!ok) return;  everything after depends on ok
+                        blk = parent.get(e)
+                        if blk is not None:
+                            sib = list(blk)
+                            after = set().union(*[_stmt_lines(x) for x in sib[sib.index(e) + 1:]] or [set()])
+                            if after:
+                                out.append(Region(fname, fn, _line(br), set(conds), after))
+                elif br.tag == SRC + "else":
+                    b = _block(br)
+                    if b is not None:
+                        out.append(Region(fname, fn, _line(br), set(conds), _stmt_lines(b)))
+        elif e.tag in (SRC + "while", SRC + "do", SRC + "switch"):
+            c = e.find(SRC + "condition")
+            b = _block(e)
+            if c is not None and b is not None:
+                out.append(Region(fname, fn, _line(c), set(_names(c)), _stmt_lines(b)))
+        elif e.tag == SRC + "for":
+            c = e.find(SRC + "control")
+            b = _block(e)
+            if c is not None and b is not None:
+                out.append(Region(fname, fn, _line(c), set(_names(c)), _stmt_lines(b)))
+    return [r for r in out if r.names and r.lines]
 EXITS = {"exit", "_exit", "abort", "sys.exit", "longjmp", "err", "errx"}
 # calls that do not return, by naming convention: error(), fatal(), die(), panic(), exit_tcpdump(), ndo->ndo_error
 NORETURN = re.compile(r"^(error|fatal|die|panic|abort|exit|bail)(_[a-z0-9]+)?$|[_.>](error|fatal|die|panic|abort)$",
@@ -196,14 +323,18 @@ def build(archive_xml: str) -> Index:
             if fn.tag not in FUNCS:
                 continue
             plist = fn.find(SRC + "parameter_list")
-            params = []
+            params, ptr_params = [], set()
             if plist is not None:
                 for p in plist.findall(SRC + "parameter"):
                     decl = p.find(SRC + "decl")
                     n = decl.find(SRC + "name") if decl is not None else p.find(".//" + SRC + "name")
                     if n is not None:
-                        params.append(_names(n)[0] if _names(n) else _text(n))
-            idx.functions.append(Function(fname, fname_of(fn), _line(fn), _end(fn), params))
+                        pname = _names(n)[0] if _names(n) else _text(n)
+                        params.append(pname)
+                        mods = {(m.text or "").strip() for m in (decl.iter(SRC + "modifier") if decl is not None else [])}
+                        if mods & {"*", "&", "&&"} or (n.find(SRC + "index") is not None):
+                            ptr_params.add(pname)
+            idx.functions.append(Function(fname, fname_of(fn), _line(fn), _end(fn), params, ptr_params))
 
         # object-like macros that rename a function: #define SYSTEM system, #define GETENV getenv
         alias = {}
@@ -253,6 +384,10 @@ def build(archive_xml: str) -> Index:
             idx.calls.append(Call(fname, fname_of(enclosing_function(call)), _line(call), cname,
                                   args, kwargs, target, arg_texts, _guards(call, parent), _compared(call, parent),
                                   _jump_line(call, parent)))
+
+        idx.regions += _regions(fname, lambda e: fname_of(enclosing_function(e)), parent, unit)
+        idx.controls += _controls(fname, lambda e: fname_of(enclosing_function(e)), unit)
+        idx.exits[fname] = {_line(x) for x in unit.iter() if x.tag in JUMPS and _line(x)}
 
         for r in unit.iter(SRC + "return"):
             fn = enclosing_function(r)

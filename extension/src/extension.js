@@ -169,9 +169,12 @@ async function sliceVariable() {
     it.children = ls.map(l => leaf(`${l}`, f, l, (vscode.workspace.textDocuments.find(d => d.uri.fsPath === uriOf(f).fsPath)?.lineAt(l - 1).text || '').trim()));
     return it;
   });
+  const edges = Object.entries(r.controlEdges || {}).flatMap(([f, es]) => es.map(e => ({ f, ...e })));
+  const flow = new vscode.TreeItem(`control flow (${edges.length} edges)`, vscode.TreeItemCollapsibleState.Collapsed);
+  flow.children = edges.map(e => leaf(`${e.from} → ${e.to}`, e.f, e.from, `${e.kind} · ${e.f} · ${e.function}`));
   const vars = new vscode.TreeItem(`variables (${r.variables.length})`, vscode.TreeItemCollapsibleState.Collapsed);
   vars.children = r.variables.map(v => { const it = new vscode.TreeItem(`${v.var}`); it.description = `${v.function} · ${v.file}`; return it; });
-  tree.set(`slice of ${w.var}`, [...files, vars]);
+  tree.set(`slice of ${w.var}`, [...files, flow, vars]);
   status.text = `$(list-flat) slice of ${w.var}: ${n} lines, ${r.variables.length} variables`;
 }
 
@@ -202,7 +205,8 @@ async function hover(doc, pos) {
   md.appendMarkdown(`def ${p.defs.join(', ') || '–'} · use ${p.uses.join(', ') || '–'}\n\n`);
   if (p.dvars.length) md.appendMarkdown(`flows into ${p.dvars.map(v => `\`${v}\``).join(', ')}\n\n`);
   if (p.aliases.length) md.appendMarkdown(`aliases ${p.aliases.map(v => `\`${v}\``).join(', ')}\n\n`);
-  if (p.calls.length) md.appendMarkdown(`passed to ${p.calls.map(c => `\`${c.name}\` (arg ${c.arg})`).join(', ')}`);
+  if (p.calls.length) md.appendMarkdown(`passed to ${p.calls.map(c => `\`${c.name}\` (arg ${c.arg})`).join(', ')}\n\n`);
+  if (p.pointsTo && p.pointsTo.length) md.appendMarkdown(`points to ${p.pointsTo.map(o => `\`${o}\``).join(', ')} (srcPtr)`);
   return new vscode.Hover(md, r0);
 }
 

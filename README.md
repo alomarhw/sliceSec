@@ -27,8 +27,10 @@ The code being analyzed is never compiled or run, so code that does not build ca
    cmake --build build -j 8
    cp build/bin/srcSlice /usr/local/bin/srcslice
    ```
-3. Install the analysis package. It needs Python 3.10 or later and has no dependencies: `pip install ./slicesec`.
-4. Install the extension. Open `extension/` in VS Code and press F5, or package it with `npx @vscode/vsce package`
+3. Optional, for pointer analysis: build the extended srcPtr in `srcptr/` (see `srcptr/ENHANCEMENTS.md`) and put
+   `srcptr` on `PATH`. Without it, aliases come from srcSlice's pointer copies only.
+4. Install the analysis package. It needs Python 3.10 or later and has no dependencies: `pip install ./slicesec`.
+5. Install the extension. Open `extension/` in VS Code and press F5, or package it with `npx @vscode/vsce package`
    and run `code --install-extension slicesec-0.2.0.vsix`.
 
 ## Layout
@@ -38,6 +40,7 @@ The code being analyzed is never compiled or run, so code that does not build ca
 | `extension/` | The VS Code extension, which talks to the analysis over JSON-RPC on stdio |
 | `slicesec/` | The analysis package, the command line `slicesec`, and its tests (`python3 -m unittest discover -s tests`) |
 | `srcslice/` | The enhanced srcSlice, with srcSAX vendored |
+| `srcptr/` | The extended srcPtr (Andersen points-to analysis on srcML), with its dependencies vendored |
 | `eval/` | The paper's evaluation: Juliet, the Python check, speed, the walkthrough example and Fig. 2 |
 
 ## Command line
@@ -56,7 +59,10 @@ slicesec slice path/to/project main.c 8 host     # forward slice of host at main
    assignment targets, parameters, returns and bounds checks.
 4. srcSlice folds each callee's facts into its callers. sliceSec keeps only the facts that the source line confirms,
    and takes calls from the call sites, so every edge of its data-flow graph is one real step.
-5. Taint is searched breadth first from all sources at once, with a hop limit (6 by default).
+5. Control dependence comes from the srcML structure: branches, loop bodies, `switch` cases and the statements
+   after an early exit. Forward slices follow it. Taint follows data only.
+6. Points-to sets come from srcPtr, and two pointers in one function that may point to the same object are aliases.
+7. Taint is searched breadth first from all sources at once, with a hop limit (6 by default).
 
 The paper has the details.
 

@@ -67,7 +67,9 @@ class Server:
                 "uses": [u for u in p.uses if u in own],
                 "dvars": [b[2] for b, how, _ in self.an.edges.get(k, []) if how in ("dvar", "sanitized", "field")],
                 "aliases": sorted({b[2] for b, how, _ in self.an.edges.get(k, []) if how == "alias"}),
-                "calls": [{"name": n, "arg": j} for n, j in calls]}
+                "calls": [{"name": n, "arg": j} for n, j in calls],
+                "pointsTo": sorted({f"{o[2]} ({o[0]}:{o[1]})" if o[3] != "function" else f"{o[2]}()"
+                                    for o in self.an.pts.get(k, set())})}
 
     def taint(self, file: str, line: int, var: str):
         k = self.an.find_var(file, line, var)

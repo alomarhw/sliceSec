@@ -1,18 +1,18 @@
-CWE78_OS_Command_Injection: 4800 cases, 1472 detected, 3328 missed
+CWE78_OS_Command_Injection: 4800 cases, 1468 detected, 3332 missed
    Windows-only API (w32)              2880 cases,  2880 missed
    other                                960 cases,   160 missed
-   wide-character variant (wchar_t)     960 cases,   288 missed
-   other, most common: [('char_listen_socket_popen', 8), ('char_file_execl', 8), ('char_listen_socket_execl', 8), ('char_console_execl', 8), ('char_console_popen', 8), ('char_listen_socket_system', 8), ('char_environment_execlp', 8), ('char_listen_socket_execlp', 8)]
-CWE134_Uncontrolled_Format_String: 2880 cases, 1583 detected, 1297 missed
-   Windows-only API (w32)               480 cases,   265 missed
-   other                               1200 cases,   170 missed
-   wide-character variant (wchar_t)    1200 cases,   862 missed
-   other, most common: [('char_connect_socket_printf', 8), ('char_environment_printf', 8), ('char_connect_socket_snprintf', 8), ('char_listen_socket_fprintf', 8), ('char_environment_snprintf', 8), ('char_file_snprintf', 8), ('char_listen_socket_snprintf', 8), ('char_environment_fprintf', 8)]
-CWE415_Double_Free: 960 cases, 360 detected, 600 missed
-   C++ new/delete                       672 cases,   445 missed
-   other                                288 cases,   155 missed
-   other, most common: [('malloc_free_int', 26), ('malloc_free_wchar_t', 26), ('malloc_free_struct', 26), ('malloc_free_long', 26), ('malloc_free_int64_t', 26), ('malloc_free_char', 25)]
-CWE416_Use_After_Free: 458 cases, 293 detected, 165 missed
-   C++ new/delete                       308 cases,   111 missed
-   other                                150 cases,    54 missed
-   other, most common: [('return_freed_ptr', 18), ('malloc_free_int', 6), ('malloc_free_int64_t', 6), ('malloc_free_long', 6), ('malloc_free_char', 6), ('malloc_free_wchar_t', 6), ('malloc_free_struct', 6)]
+   wide-character variant (wchar_t)     960 cases,   292 missed
+   other, most common: [('char_connect_socket_execl', 8), ('char_listen_socket_system', 8), ('char_console_execl', 8), ('char_console_system', 8), ('char_environment_system', 8), ('char_connect_socket_popen', 8), ('char_listen_socket_popen', 8), ('char_file_system', 8)]
+CWE134_Uncontrolled_Format_String: 2880 cases, 1521 detected, 1359 missed
+   Windows-only API (w32)               480 cases,   285 missed
+   other                               1200 cases,   210 missed
+   wide-character variant (wchar_t)    1200 cases,   864 missed
+   other, most common: [('char_console_vfprintf', 9), ('char_connect_socket_vprintf', 9), ('char_listen_socket_vfprintf', 9), ('char_environment_vfprintf', 9), ('char_environment_vprintf', 9), ('char_file_vprintf', 9), ('char_listen_socket_vprintf', 9), ('char_console_vprintf', 9)]
+CWE415_Double_Free: 960 cases, 458 detected, 502 missed
+   C++ new/delete                       672 cases,   376 missed
+   other                                288 cases,   126 missed
+   other, most common: [('malloc_free_wchar_t', 21), ('malloc_free_int', 21), ('malloc_free_struct', 21), ('malloc_free_int64_t', 21), ('malloc_free_long', 21), ('malloc_free_char', 21)]
+CWE416_Use_After_Free: 458 cases, 353 detected, 105 missed
+   C++ new/delete                       308 cases,    69 missed
+   other                                150 cases,    36 missed
+   other, most common: [('return_freed_ptr', 18), ('malloc_free_char', 3), ('malloc_free_int64_t', 3), ('malloc_free_int', 3), ('malloc_free_long', 3), ('malloc_free_struct', 3), ('malloc_free_wchar_t', 3)]

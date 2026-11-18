@@ -65,6 +65,8 @@ def parse(text: str) -> list[Profile]:
 
 def tool_versions() -> dict[str, str]:
     v = {}
+    if shutil.which("srcptr") or os.environ.get("SLICESEC_SRCPTR"):
+        v["srcptr"] = "srcPtr (sliceSec fork, Andersen)"
     for t in ("srcml", "srcslice"):
         p = shutil.which(t)
         if p is None:
@@ -100,6 +102,10 @@ class Archive:
     profiles: list[Profile] = field(default_factory=list)
     digest: str = ""
     skipped: list[str] = field(default_factory=list)   # files srcML could not turn into well-formed XML
+    # points-to facts from srcPtr (Andersen): (file, line, name, kind) of the pointer and of the object; empty when
+    # srcPtr is not installed
+    points_to: list[tuple[str, int, str, str, str, int, str, str]] = field(default_factory=list)
+    srcptr: bool = False
 
 
 def run(root: Path, cache_dir: Path) -> Archive:
@@ -137,7 +143,27 @@ def run(root: Path, cache_dir: Path) -> Archive:
         out.write_text(r.stdout)
         skipped_file.write_text("\n".join(skipped))
     skipped = [x for x in skipped_file.read_text().splitlines() if x] if skipped_file.exists() else []
-    return Archive(root, xml, parse(out.read_text()), digest, skipped)
+    pts_file = cache_dir / f"{digest}.pts"
+    srcptr = os.environ.get("SLICESEC_SRCPTR") or shutil.which("srcptr")
+    if srcptr and not pts_file.exists():
+        # objects more than 20 variables point to are shared hubs that sliceSec ignores; leave them out of the output
+        r = subprocess.run([srcptr, "-i", str(xml), "-a", "--tsv", "--max-pointers", "20"], capture_output=True, text=True)
+        pts_file.write_text(r.stdout if r.returncode == 0 else "")
+    facts = parse_points_to(pts_file.read_text()) if pts_file.exists() else []
+    return Archive(root, xml, parse(out.read_text()), digest, skipped, facts, bool(srcptr))
+
+
+def parse_points_to(text: str) -> list[tuple[str, int, str, str, str, int, str, str]]:
+    out = []
+    for line in text.splitlines():
+        f = line.split("\t")
+        if len(f) != 8:
+            continue
+        try:
+            out.append((f[0], int(f[1]), f[2], f[3], f[4], int(f[5]), f[6], f[7]))
+        except ValueError:
+            continue
+    return out
 
 
 def _well_formed(xml: Path) -> bool:

@@ -1,0 +1,8 @@
+# Intel(R) Xeon(R) W-2140B CPU @ 3.20GHz, 32 GB, macOS 15.8.3, Python 3.12.2; {'srcml': 'srcml: 1.1.0', 'srcslice': 'srcSlice 1.1.0'}
+project files LOC | srcML s | srcSlice s | index+graph s | rules s | first analysis s | unchanged save s | save after an edit s | profiles edges findings | slice query | taint query
+tcpdump 245 118112 | 1.0 | 1.5 | 3.8 | 0.35 | 8.7 | 0.014 (same=True) | 9.7 | 8022 26675 0 | median 28.4 ms, p95 35.6 ms | median 0.0 ms, p95 0.0 ms | skipped []
+libxml2 218 214578 | 2.8 | 3.0 | 11.4 | 0.56 | 23.0 | 0.029 (same=True) | 23.9 | 19234 86057 57 | median 92.3 ms, p95 112.0 ms | median 0.0 ms, p95 0.0 ms | skipped []
+libtiff 155 124394 | 2.0 | 1.8 | 5.8 | 0.36 | 13.9 | 0.008 (same=True) | 13.6 | 12287 60547 92 | median 43.9 ms, p95 51.7 ms | median 0.0 ms, p95 0.0 ms | skipped []
+openjpeg 322 262867 | 86.7 | 2.6 | 10.7 | 0.67 | 42.3 | 0.012 (same=True) | 43.3 | 27555 86388 154 | median 0.5 ms, p95 94.3 ms | median 0.0 ms, p95 0.0 ms | skipped ['thirdparty/libz/deflate.c']
+curl 1100 313583 | 230.5 | 3.7 | 12.4 | 1.04 | 59.4 | 0.045 (same=True) | 62.0 | 38602 142168 112 | median 1.2 ms, p95 174.5 ms | median 0.0 ms, p95 0.0 ms | skipped ['docs/examples/log_failed_transfers.c']
+pip (Python) 487 182476 | 1.2 | 1.6 | 8.5 | 0.36 | 17.5 | 0.017 (same=True) | 16.5 | 23626 210726 49 | median 0.2 ms, p95 68.2 ms | median 0.0 ms, p95 0.0 ms | skipped []

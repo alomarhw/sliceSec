@@ -3,11 +3,16 @@
 A node is a variable in a function: (file, function, var), one srcSlice profile. Edges:
   dvar      v -> d       d's value is computed from v (srcSlice dvars, confirmed on d's def line)
   alias     p <-> q      q points to p (srcSlice pointers, confirmed on a def line)
+  points-to p <-> q      srcPtr (Andersen) finds that both may point to the same object, within one function;
+                         taint and the use-after-free rule follow it, slices do not
   call      arg -> param v is passed to a function defined in the archive (srcML call sites)
   out       param -> arg the callee writes through a pointer parameter (srcSlice lists the argument among the
                          parameter's pointers)
   return    ret -> x     x is assigned the result of such a function, which returns ret
   copy      src -> dst   a library copy (strcpy, memcpy, sprintf, ..) from the srcML call sites
+  control   v -> d       d is defined in a branch, loop body or case that a predicate reading v controls (srcML
+                         structure; srcSlice has no control dependence). Slices follow it; taint does not, unless
+                         implicit flows are switched on
 srcSlice folds every callee's facts into its callers' profiles; edges use only facts the source line confirms, and
 calls come from the call sites, so each edge is one real step. The forward slice of a variable is the def and use
 lines of every node reachable from it. A taint path is a shortest path from a source to a variable used at a
@@ -63,8 +68,9 @@ def _is_py(file: str) -> bool:
 
 
 class Analysis:
-    def __init__(self, archive: Archive, index: Index, max_hops: int = 6):
-        self.archive, self.index, self.max_hops = archive, index, max_hops
+    def __init__(self, archive: Archive, index: Index, max_hops: int = 6, implicit: bool = False):
+        # implicit: let taint follow control dependence too (off by default: implicit flows flood the findings)
+        self.archive, self.index, self.max_hops, self.implicit = archive, index, max_hops, implicit
         self.prof: dict[Key, Profile] = {p.key: p for p in archive.profiles}
         self.by_var: dict[tuple[str, str], list[Key]] = {}
         for k in self.prof:
@@ -78,7 +84,14 @@ class Analysis:
         for fn in index.functions:
             self.fn_named.setdefault(fn.name, []).append(fn)
         self.edges: dict[Key, list[tuple[Key, str, int]]] = {}   # node -> [(node, how, line)]
+        self.in_function: dict[tuple[str, str], list[Key]] = {}
+        for k in self.prof:
+            self.in_function.setdefault((k[0], k[1]), []).append(k)
+        self.controls: dict[Key, list] = {}                       # predicate variable -> regions it controls
+        self.pts: dict[Key, set[tuple]] = {}                      # pointer -> abstract objects (srcPtr)
+        self._load_points_to()
         self._build_edges()
+        self._build_control()
 
     # ---- source text -------------------------------------------------------------------------------------
     def src_line(self, file: str, line: int) -> str:
@@ -104,6 +117,13 @@ class Analysis:
         fld = re.compile(rf"\b{v}\s*(->|\.|\[)[^=;]*[^=!<>]=[^=]")
         whole = re.compile(rf"(^|[^.>\w]){v}\s*[-+*/|&^]?=[^=]")
         return all(fld.search(self.src_line(t[0], d)) and not whole.search(self.src_line(t[0], d)) for d in p.defs)
+
+    def _alias_before(self, q: Key, p: Key, before: int) -> bool:
+        """q and p alias at the free on line `before`: srcPtr says they may point to the same object and q got its
+        value before that line, or (without srcPtr facts for them) a plain q = p copy precedes the free."""
+        if p in self.pts and q in self.pts:
+            return self.may_alias(p, q) and any(0 < d < before for d in self.prof[q].defs)
+        return self._plain_alias(q, p, before)
 
     def _plain_alias(self, q: Key, p: Key, before: int) -> bool:
         """q = p (optionally cast) or p = q on a def line before `before`: a real pointer copy."""
@@ -136,6 +156,29 @@ class Analysis:
         variable, self, this or cls (r.find(u)); subprocess.run or std::system name a library function."""
         parts = c.name.replace("::", ".").split(".")
         return len(parts) == 1 or parts[0] in ("self", "this", "cls") or (c.file, c.function, parts[0]) in self.prof
+
+    def _writes_through(self, fn, t: Key) -> bool:
+        """The function writes the memory its parameter t points to: a def after the header (*t = .., t[i] = ..),
+        or t is the destination of a library copy or the buffer of an input call (snprintf(t, ..), recv(fd, t, ..))."""
+        # a def after the header that writes through t itself (*t = .., t[i] = ..); a field write (t->f = ..) does
+        # not count, because fields are not told apart: a context struct passed to most functions would otherwise
+        # link every callee back to every caller
+        v = re.escape(t[2])
+        whole = re.compile(rf"^\s*(\(?\s*\*+\s*\(?\s*{v}\b|{v}\s*\[)[^;=]*[^=!<>]=[^=]|^\s*{v}\s*=[^=]")
+        if any(d > fn.start and whole.search(self.src_line(t[0], d)) for d in self.prof[t].defs):
+            return True
+        for c in self.calls_in.get((t[0], t[1]), []):
+            spec = R.C_PROPAGATORS.get(c.short)
+            if spec and spec[1]:
+                dst = spec[1] if isinstance(spec[1], str) else (spec[1],)
+                if any(t[2] in c.args[d - 1] for d in R.positions(dst, len(c.args))):
+                    return True
+            src = R.C_SOURCE_ARGS.get(c.short)
+            if src:
+                for pos in R.positions(src if isinstance(src, str) else tuple(src), len(c.args)):
+                    if t[2] in c.args[pos - 1]:
+                        return True
+        return False
 
     def callees(self, c: Call) -> list:
         """The functions a call can reach, by name. A definition in the caller's own file wins: static C functions
@@ -170,6 +213,13 @@ class Analysis:
                 if t in self.prof and (self._on_def_line(k, q) or self._on_def_line(t, k[2])):
                     self._add(t, k, "alias", (p.defs or [0])[0])
                     self._add(k, t, "alias", (p.defs or [0])[0])
+        for o, ptrs in getattr(self, "pointed_by", {}).items():   # srcPtr: pointers to one object alias each other
+            if len(ptrs) > self.HUB:
+                continue
+            for a in ptrs:
+                for b in ptrs:
+                    if a != b and a[:2] == b[:2]:
+                        self._add(a, b, "points-to", (self.prof[b].defs or [0])[0])
         for c in self.index.calls:      # argument -> parameter, and callee return value -> assigned variable
             if not self._local_call(c):
                 continue
@@ -180,9 +230,12 @@ class Analysis:
                         for v in names:
                             a, t = self.node(c.file, c.function, v), self.node(fn.file, fn.name, fn.params[j + off])
                             self._add(a, t, "call", c.line)
-                            # an output parameter: srcSlice lists the caller's argument among the parameter's
-                            # pointers, so what the callee writes through it reaches the caller's variable
-                            if a and t and v in self.prof[t].pointers:
+                            # an output parameter: declared as a pointer, reference or array (or srcSlice lists the
+                            # caller's argument among the parameter's pointers), and the callee writes through it (a def after its header, like *dst = ..
+                            # or recv(fd, buf, ..)), so what it writes reaches the caller's variable. A parameter
+                            # the callee only reads (free(p), strlen(s)) gets no such edge.
+                            if a and t and (v in self.prof[t].pointers or t[2] in fn.ptr_params) \
+                                    and self._writes_through(fn, t):
                                 self._add(t, a, "out", c.line)
                 if c.target:
                     for v in self.index.returns.get((fn.file, fn.name), ()):
@@ -205,6 +258,127 @@ class Analysis:
                         self._add(self.node(c.file, c.function, s), self.node(c.file, c.function, d),
                                   "copy" if dst_pos else "return", c.line)
 
+    HUB = 20   # an object more pointers than this reach is a shared context (tcpdump's ndo): no alias edges
+
+    def _load_points_to(self) -> None:
+        """srcPtr's points-to facts, mapped to sliceSec's variables by file, declaration line and name."""
+        for pf, pl, pn, pk, of, ol, on, ok in self.archive.points_to:
+            if pk != "var" or not pf:
+                continue
+            fn = self.index.function_at(pf, pl)
+            k = (pf, fn.name if fn else "", pn)
+            if k not in self.prof and not fn:
+                k = (pf, "GLOBAL", pn)
+            if k in self.prof:
+                self.pts.setdefault(k, set()).add((of, ol, on, ok))
+        self.pointed_by: dict[tuple, set[Key]] = {}
+        for k, objs in self.pts.items():
+            for o in objs:
+                self.pointed_by.setdefault(o, set()).add(k)
+
+    def may_alias(self, a: Key, b: Key) -> bool:
+        """Both point to some object that is not a shared hub."""
+        return any(len(self.pointed_by.get(o, ())) <= self.HUB for o in self.pts.get(a, set()) & self.pts.get(b, set()))
+
+    def _build_control(self) -> None:
+        """Control dependence from the srcML regions: each variable read by a predicate controls the statements of
+        its region, and so the variables defined there (srcSlice records no control dependence)."""
+        for r in self.index.regions:
+            for v in r.names:
+                k = (r.file, r.function, v)
+                if k not in self.prof:
+                    continue
+                self.controls.setdefault(k, []).append(r)
+                for d in self.in_function.get((r.file, r.function), []):
+                    if d != k and any(x in r.lines for x in self.prof[d].defs):
+                        self._add(k, d, "control", r.line)
+
+    # ---- control flow between slice lines (srcSlice's controledges, JSEP 2014, Sec. 2.5) -------------------
+    def _ctrl_tables(self, file: str, function: str):
+        """Per function, built once: its control statements, each line's (if, part) memberships, and each line's
+        enclosing predicates."""
+        cache = self.__dict__.setdefault("_ctrl_cache", {})
+        key = (file, function)
+        if key not in cache:
+            if not hasattr(self, "_ctrl_by_fn"):
+                self._ctrl_by_fn = {}
+                for c in self.index.controls:
+                    self._ctrl_by_fn.setdefault((c.file, c.function), []).append(c)
+            ctrls = self._ctrl_by_fn.get(key, [])
+            part_of: dict[int, list[tuple[int, int]]] = {}        # line -> [(if id, branch index)]
+            preds: dict[int, set[int]] = {}                      # line -> predicate lines that control it
+            for ci, c in enumerate(ctrls):
+                parts = [ls for _, ls in c.branches] + ([c.else_lines] if c.else_lines else [])
+                for pi, ls in enumerate(parts):
+                    hdrs = {h for h, _ in c.branches[:pi + 1]} if pi < len(c.branches) else {h for h, _ in c.branches}
+                    for l in ls:
+                        if c.kind == "if":
+                            part_of.setdefault(l, []).append((ci, pi))
+                        preds.setdefault(l, set()).update(hdrs)
+            cache[key] = (ctrls, part_of, preds)
+        return cache[key]
+
+    def control_edges(self, file: str, function: str, lines: set[int]) -> list[tuple[int, int, str]]:
+        """Control-flow edges between the slice lines of one function (srcSlice's controledges, JSEP 2014,
+        Sec. 2.5). A control statement adds (predecessor, first slice line of its body, "true") and (predecessor,
+        first slice line of the else part or after it, "false"); the predecessor is its predicate line if that is
+        in the slice, else the last slice line before it. Successive slice lines are linked ("next"), except a line
+        in one branch of an if and a line in another, and except after a return or throw."""
+        L = sorted(lines)
+        if not L:
+            return []
+        ctrls, part_of, _ = self._ctrl_tables(file, function)
+        exits = self.index.exits.get(file, set())
+        edges: dict[tuple[int, int], str] = {}
+        for a, b in zip(L, L[1:]):
+            if a in exits:
+                continue
+            pa = dict(part_of.get(a, []))
+            if any(ci in pa and pa[ci] != pi for ci, pi in part_of.get(b, [])):
+                continue
+            edges[(a, b)] = "next"
+        import bisect
+        for c in ctrls:
+            body = c.branches[0][1]
+            lo = bisect.bisect_left(L, min(body)) if body else len(L)
+            inside = [x for x in L[lo:] if x in body][:1] if body else []
+            if c.header not in lines and not inside:
+                continue
+            if c.header in lines:
+                pred = c.header
+            else:
+                i = bisect.bisect_left(L, c.header)
+                pred = L[i - 1] if i > 0 else None
+            if pred is None:
+                continue
+            t = inside[0] if inside else None
+            f = None
+            for ls in [ls for _, ls in c.branches[1:]] + ([c.else_lines] if c.else_lines else []):
+                hit = [x for x in L if x in ls]
+                if hit:
+                    f = hit[0]
+                    break
+            if f is None:
+                j = bisect.bisect_right(L, c.end)
+                f = L[j] if j < len(L) else None
+            if t is not None and t != pred:
+                edges[(pred, t)] = "true"
+            if f is not None and f != pred:
+                edges[(pred, f)] = "false"
+        return sorted((a, b, k) for (a, b), k in edges.items())
+
+    def predicates_of(self, file: str, function: str, lines: set[int]) -> set[int]:
+        """The predicate lines of the control statements that enclose the given lines (JSEP 2014, Sec. 2.4: the
+        immediate control predicate of a statement in the slice is in the slice), closed over nesting."""
+        _, _, preds = self._ctrl_tables(file, function)
+        out, todo = set(), [l for l in lines if l in preds]
+        while todo:
+            for h in preds.get(todo.pop(), ()):
+                if h not in out and h not in lines:
+                    out.add(h)
+                    todo.append(h)
+        return out
+
     # ---- slices ------------------------------------------------------------------------------------------
     def own_lines(self, k: Key) -> list[int]:
         """k's def and use lines inside its own function (srcSlice also lists the lines of callees it reaches,
@@ -226,20 +400,51 @@ class Analysis:
         fn = self.index.function_at(file, line)
         return self.node(file, fn.name if fn else "", var)
 
+    SLICE_SKIP = ("control", "points-to")
+
     def forward_slice(self, start: Key) -> dict:
+        """Variables reached along data dependence (dvars, copies, calls, returns, output parameters, srcSlice's
+        pointer copies). Control dependence adds the statements a reached variable's predicates control, the
+        predicates around slice lines and the control-flow edges, but the slice does not continue from the
+        variables defined in those statements, and srcPtr's may-alias pairs are not followed: on a
+        context-insensitive graph either would connect most of a program (tcpdump: 6,500 of 8,000 variables)."""
         seen, todo = {start}, deque([start])
         while todo:
-            for b, _, _ in self.edges.get(todo.popleft(), []):
+            for b, how, _ in self.edges.get(todo.popleft(), []):
+                if how in self.SLICE_SKIP:
+                    continue
                 if b not in seen:
                     seen.add(b)
                     todo.append(b)
         lines: dict[str, set[int]] = {}
         for k in seen:
             lines.setdefault(k[0], set()).update(self.own_lines(k))
+            for r in self.controls.get(k, []):           # statements under a predicate that reads k
+                lines[k[0]].update(r.lines)
+        # a forward slice starts at the criterion: drop lines of its own function before its first definition
+        # (JSEP 2014: "minus any lines that are before the initial definition of the slice variable")
+        first = min(self.prof[start].defs or [0])
+        cfn = self.index.function_at(start[0], first) if start[1] else None
+        if cfn is not None and start[0] in lines:
+            lines[start[0]] = {l for l in lines[start[0]] if not (cfn.start <= l < first)}
+        # per function: add the enclosing predicates, then the control-flow edges between the slice lines
+        by_fn: dict[tuple[str, str], set[int]] = {}
+        for f, ls in lines.items():                       # each slice line once
+            for l in ls:
+                f2 = self.index.function_at(f, l)
+                if f2 is not None:
+                    by_fn.setdefault((f, f2.name), set()).add(l)
+        flow = {}
+        for (f, fn), ls in by_fn.items():
+            preds = self.predicates_of(f, fn, ls)
+            lines[f].update(preds)
+            flow.setdefault(f, []).extend({"function": fn, "from": a, "to": b, "kind": kk}
+                                          for a, b, kk in self.control_edges(f, fn, ls | preds))
         return {"criterion": {"file": start[0], "function": start[1], "var": start[2]},
                 "variables": sorted([{"file": f, "function": fn, "var": v} for f, fn, v in seen],
                                     key=lambda x: (x["file"], x["function"], x["var"])),
-                "lines": {f: sorted(ls) for f, ls in sorted(lines.items())}}
+                "lines": {f: sorted(ls) for f, ls in sorted(lines.items())},
+                "controlEdges": {f: sorted(es, key=lambda e: (e["from"], e["to"])) for f, es in sorted(flow.items())}}
 
     # ---- taint -------------------------------------------------------------------------------------------
     def sources(self) -> list[tuple[Key, Step]]:
@@ -324,7 +529,7 @@ class Analysis:
             if self.max_hops and depth[a] >= self.max_hops:
                 continue
             for b, how, line in self.edges.get(a, []):
-                if how not in ("sanitized", "field") and b not in parent:
+                if how not in ("sanitized", "field") and (how != "control" or self.implicit) and b not in parent:
                     # a call step points at the call site, in the caller's file
                     st = Step(a[0], line, b[2], a[1], f"passed to {b[1]}()") if how == "call" else \
                         Step(b[0], line, b[2], b[1], f"written by {a[1]}()") if how == "out" else \
@@ -390,9 +595,15 @@ class Analysis:
         fn = next((f for f in self.fn_named.get(node[1], []) if f.file == node[0]
                    and any(f.start <= d <= f.end for d in p.defs)), None)
         end = fn.end if fn else 10 ** 9
-        redef = [d for d in p.defs if d > after]
+        # n[0] = .., *n = .., n->f = ..: srcSlice records a def of n, but it writes the memory n points to, so it is
+        # a use of that memory, not a new value of n
+        v = re.escape(node[2])
+        # at the start of the statement: `char *data = ..` declares data, it does not write through it
+        through = re.compile(rf"^\s*(\(?\s*\*+\s*\(?\s*{v}\b|{v}\s*(\[|->|\.))[^;=]*[^=!<>]=[^=]")
+        writes = {d for d in p.defs if through.search(self.src_line(node[0], d))}
+        redef = [d for d in p.defs if d > after and d not in writes]
         own = set(self.own_lines(node))
-        for u in sorted(x for x in p.uses if x in own):
+        for u in sorted(x for x in set(p.uses) | writes if x in own):
             if not (after < u <= end) or u >= stop or any(d <= u for d in redef):
                 continue
             here = [c for c in self.calls_at.get((node[0], u), []) if any(node[2] in a for a in c.args)]
@@ -438,7 +649,8 @@ class Analysis:
             while todo:
                 a0 = todo.pop()
                 for b, how, _ in self.edges.get(a0, []):
-                    if how == "alias" and b not in aliases and b[1] == fn.name and self._plain_alias(b, a0, c.line):
+                    if how in ("alias", "points-to") and b not in aliases and b[1] == fn.name \
+                            and self._alias_before(b, a0, c.line):
                         aliases.add(b)
                         todo.append(b)
             for a in sorted(aliases):
@@ -463,6 +675,6 @@ class Analysis:
         return out
 
 
-def analyze(root: Path, cache_dir: Path, max_hops: int = 6) -> Analysis:
+def analyze(root: Path, cache_dir: Path, max_hops: int = 6, implicit: bool = False) -> Analysis:
     archive = run_srcslice(root, cache_dir)
-    return Analysis(archive, build_index(str(archive.xml)), max_hops)
+    return Analysis(archive, build_index(str(archive.xml)), max_hops, implicit)

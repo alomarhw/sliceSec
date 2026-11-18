@@ -1,0 +1,10 @@
+# pointer_line	pointer	object_line	object	(file names omitted; one fact per line)
+4	out	10	r
+4	v	6	a
+7	p	6	a
+8	q	6	a
+10	r	6	a
+12	pp	7	p
+13	s	6	a
+17	m	17	heap@17
+18	n	17	heap@17

@@ -1,7 +1,12 @@
 # Evaluation
 
-These are the scripts and outputs behind the numbers in the paper. The evaluated version is tag `v1-eval`.
-`CHANGES.md` lists the fixes made since then.
+These are the scripts and outputs behind the numbers in the paper. There are two evaluated versions:
+- **`v1-eval`** froze the rules before the first run on CWE-78, 134 and 415. Its outputs are in `v1-eval/`.
+- **`v2-eval`** is the version the paper describes. It adds control dependence, control-flow paths, the extended
+  srcPtr and the fixes that v1's misses revealed, so its Juliet numbers are not from held-out data. Its outputs are
+  in this folder.
+
+`CHANGES.md` lists every change.
 
 ## Juliet C/C++ 1.3: CWE-78, 134, 415 and 416
 
