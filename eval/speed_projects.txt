@@ -1,0 +1,6 @@
+tcpdump https://github.com/the-tcpdump-group/tcpdump.git eebca9915dc33ce4724ca55010c507c80f519c1b
+libxml2 https://gitlab.gnome.org/GNOME/libxml2.git 16d4a7c21ea79664f3670aafc17958c10fcab9f9
+libtiff https://gitlab.com/libtiff/libtiff.git 0962d91b19f172eba97caf2ee31995a39d99768b
+openjpeg https://github.com/uclouvain/openjpeg.git 8314119b067c0fc77834731168daaebd379fdb12
+curl https://github.com/curl/curl.git 7f4cfe13b67c5b876d109fba04a2f18c05ef6922
+pip pip 24.0

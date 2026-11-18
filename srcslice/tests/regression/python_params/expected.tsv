@@ -1,0 +1,13 @@
+a1	x	cf	g{1}
+a1	xint	absent
+a2	x	cf	g{1}
+a2	y	cf	g{2}
+a3	limit	cf	g{1}
+a3		absent
+a3	limitint	absent
+a4	self	cf	g{1}
+propertya4	self	absent
+a5	path	cf	g{1}
+a6	x	cf	g{1}
+a7	key	cf	g{1}
+a7	value	cf	g{2}

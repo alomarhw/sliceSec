@@ -1,0 +1,10 @@
+# Python sanity check, 29 functions; bandit 1.9.4
+file       bad good  tool      detected false alarm
+cwe22.py     3    3  sliceSec         3           0   fa=[]
+cwe22.py     3    3  Bandit           0           0   fa=[]
+cwe78.py     5    5  sliceSec         5           0   fa=[]
+cwe78.py     5    5  Bandit           5           4   fa=['good_constant', 'good_int', 'good_interprocedural', 'good_quoted']
+cwe89.py     3    3  sliceSec         3           0   fa=[]
+cwe89.py     3    3  Bandit           3           1   fa=['good_int']
+cwe95.py     3    4  sliceSec         3           0   fa=[]
+cwe95.py     3    4  Bandit           3           3   fa=['good_constant', 'good_float', 'good_interprocedural']

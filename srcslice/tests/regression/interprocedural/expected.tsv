@@ -1,0 +1,13 @@
+# callers inherit the slice of the matching callee parameter only
+callee	p	dv	pdep
+callee	k	dv	kdep
+caller_a	a	dv	pdep
+caller_a	a	nodv	kdep
+caller_a	a	use	9;20
+caller_a	b	dv	kdep
+caller_a	b	nodv	pdep
+caller_a	b	use	10;20
+caller_b	a	dv	kdep
+caller_b	a	nodv	pdep
+caller_b	b	dv	pdep;out
+caller_b	b	nodv	kdep;r

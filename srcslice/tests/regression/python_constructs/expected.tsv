@@ -1,0 +1,40 @@
+# keyword arguments map to the callee's named parameter
+p_kw	x	cf	g{1};g{2}
+p_kwonly	x	cf	g{1}
+# methods: the receiver fills self, so argument k is parameter k+1
+caller	z	cf	m{2}
+caller	z	dv	w
+p_method_arg	x	cf	m{2}
+p_method_arg	x	dv	w
+# for-loop target
+p_for	it	def	25
+p_for	items	dv	it
+p_for	it	cf	g{1}
+p_for	total	def	24;26
+# with ... as
+p_with	path	cf	open{1}
+p_with	path	dv	fh
+p_with	fh	def	30
+p_with	fh	dv	data
+# tuple assignment: separate targets, no phantom
+p_tuple	ab	absent
+p_tuple	a	def	35
+p_tuple	b	def	35
+p_tuple	x	dv	a
+p_tuple	y	dv	b
+p_tuple	x	cf	g{1}
+# augmented assignment
+p_aug	x	dv	acc
+p_aug	acc	def	39;40
+# comprehension variable
+p_compr	e	cf	g{1}
+p_compr	xs	dv	e
+# lambda parameter must not leak into the next function
+p_while	kx	absent
+p_while	x	def	68
+p_while	x	cf	g{1}
+p_lambda	k	cf	g{1}
+# unchanged behaviour
+p_attr_arg	obj	cf	g{1}
+p_star	args	cf	g{1}
+p_kw	x	dv	r

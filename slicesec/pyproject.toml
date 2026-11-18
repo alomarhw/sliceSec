@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "slicesec"
+version = "0.2.0"
+description = "srcSlice-based forward slices, taint paths and vulnerability rules for C, C++ and Python"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+slicesec = "slicesec.cli:main"
+slicesec-server = "slicesec.server:main"
+
+[tool.setuptools]
+packages = ["slicesec"]

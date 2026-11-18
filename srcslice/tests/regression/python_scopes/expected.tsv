@@ -1,0 +1,11 @@
+inner	b	cf	g{1}
+outer	a	cf	inner{1};g{1}
+outer	r	cf	g{1}
+outer	b	absent
+use_loads	hook	cf	loads{3}
+use_loads	t	cf	loads{1}
+kwcall	x	cf	g{1}
+# raise / yield arguments; a call receiver inside an argument is not that argument
+raises	x	cf	ValueError{1}
+yields	x	cf	g{1}
+receiver	fp	cf	

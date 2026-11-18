@@ -1,0 +1,12 @@
+# a subscript reads its index (Python and C); a module variable read inside a function
+GLOBAL	a	use	6
+GLOBAL	k	use	9
+GLOBAL	k	dv	x
+GLOBAL	EDGES	use	14;16
+GLOBAL	EDGES	dv	u;v;local
+layer	u	use	15
+layer	v	use	15
+layer	EDGES2	def	17
+GLOBAL	EDGES2	absent
+pick	i	use	3;5
+pick	i	dv	y;z

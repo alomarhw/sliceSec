@@ -1,0 +1,10 @@
+m3	s	cf	g{1}
+m3	ws	cf	
+m4	a	cf	g{1};g{3}
+m4	s	cf	memset{1}
+m5	p	cf	g{1}
+m5	k	cf	g{2}
+m6	k	cf	h{1}
+m6	p	cf	h{1}
+m7	p	cf	g{1}
+m7	ws	cf	g{2}

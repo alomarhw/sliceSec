@@ -1,0 +1,44 @@
+{
+  "name": "slicesec",
+  "displayName": "sliceSec: srcSlice slices and taint paths",
+  "description": "Forward slices from srcSlice, taint paths and vulnerability findings for C, C++ and Python, in the editor",
+  "version": "0.2.0",
+  "publisher": "slicesec",
+  "license": "GPL-3.0-only",
+  "engines": { "vscode": "^1.85.0" },
+  "categories": ["Linters", "Programming Languages", "Other"],
+  "keywords": ["program slicing", "srcSlice", "srcML", "taint analysis", "security"],
+  "activationEvents": ["onLanguage:c", "onLanguage:cpp", "onLanguage:python"],
+  "main": "./src/extension.js",
+  "contributes": {
+    "commands": [
+      { "command": "slicesec.analyze", "title": "sliceSec: Analyze Workspace" },
+      { "command": "slicesec.sliceVariable", "title": "sliceSec: Forward Slice of Variable at Cursor" },
+      { "command": "slicesec.showTaintPath", "title": "sliceSec: Show Taint Path to Variable at Cursor" },
+      { "command": "slicesec.clearHighlights", "title": "sliceSec: Clear Highlights" },
+      { "command": "slicesec.restartServer", "title": "sliceSec: Restart Analysis Server" }
+    ],
+    "menus": {
+      "editor/context": [
+        { "command": "slicesec.sliceVariable", "group": "slicesec@1", "when": "editorLangId =~ /^(c|cpp|python)$/" },
+        { "command": "slicesec.showTaintPath", "group": "slicesec@2", "when": "editorLangId =~ /^(c|cpp|python)$/" }
+      ]
+    },
+    "views": { "explorer": [ { "id": "slicesec.results", "name": "Slice and Taint Path" } ] },
+    "configuration": {
+      "title": "sliceSec",
+      "properties": {
+        "slicesec.pythonPath": { "type": "string", "default": "python3", "description": "Python 3.10+ used to run the analysis server." },
+        "slicesec.backendPath": { "type": "string", "default": "", "description": "Folder that contains the slicesec package. Empty: the copy bundled with the extension, else the one installed for pythonPath." },
+        "slicesec.maxHops": { "type": "number", "default": 6, "description": "Longest taint path followed, in edges (0 = no limit)." },
+        "slicesec.analyzeOnSave": { "type": "boolean", "default": true, "description": "Analyze the workspace when a C, C++ or Python file is saved." }
+      }
+    },
+    "colors": [
+      { "id": "slicesec.sliceBackground", "description": "Lines in the forward slice", "defaults": { "dark": "#2b4a2b88", "light": "#d8f0d888", "highContrast": "#00440088" } },
+      { "id": "slicesec.criterionBackground", "description": "The slicing criterion", "defaults": { "dark": "#4a4a1a", "light": "#fff3b0", "highContrast": "#666600" } },
+      { "id": "slicesec.taintBackground", "description": "Lines on a taint path", "defaults": { "dark": "#5a2a2a88", "light": "#fbe0e088", "highContrast": "#66000088" } }
+    ]
+  },
+  "scripts": { "package": "npx @vscode/vsce package --allow-missing-repository" }
+}
