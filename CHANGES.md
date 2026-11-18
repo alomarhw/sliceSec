@@ -7,3 +7,5 @@
 - Slice queries cache each variable's own lines (tcpdump median 374 ms to 28 ms).
 - The server keeps its analysis when a save changes no source file.
 - When srcML produces malformed XML, the files are converted one at a time in parallel to find the bad one.
+- A call goes to the function of that name in the caller's own file when there is one. Juliet's `static` C helpers
+  and its per-test C++ namespaces repeat names across files, so name-only resolution followed calls into other files.

@@ -137,6 +137,13 @@ class Analysis:
         parts = c.name.replace("::", ".").split(".")
         return len(parts) == 1 or parts[0] in ("self", "this", "cls") or (c.file, c.function, parts[0]) in self.prof
 
+    def callees(self, c: Call) -> list:
+        """The functions a call can reach, by name. A definition in the caller's own file wins: static C functions
+        and helpers in a per-file C++ namespace often share their name with functions in other files."""
+        fns = self.fn_named.get(c.short, [])
+        same = [f for f in fns if f.file == c.file]
+        return same or fns
+
     def _add(self, a: Key, b: Key | None, how: str, line: int) -> None:
         if b is not None and b != a:
             self.edges.setdefault(a, []).append((b, how, line))
@@ -166,7 +173,7 @@ class Analysis:
         for c in self.index.calls:      # argument -> parameter, and callee return value -> assigned variable
             if not self._local_call(c):
                 continue
-            for fn in self.fn_named.get(c.short, []):
+            for fn in self.callees(c):
                 off = 1 if (fn.params[:1] in (["self"], ["cls"]) and "." in c.name) else 0
                 for j, names in enumerate(c.args):
                     if j + off < len(fn.params):
@@ -259,7 +266,7 @@ class Analysis:
                 st = self._source_in_arg(c, j)
                 if st is None:
                     continue
-                for fn in self.fn_named[c.short]:
+                for fn in self.callees(c):
                     off = 1 if (fn.params[:1] in (["self"], ["cls"]) and "." in c.name) else 0
                     if j - 1 + off < len(fn.params):
                         k = self.node(fn.file, fn.name, fn.params[j - 1 + off])

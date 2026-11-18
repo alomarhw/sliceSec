@@ -131,6 +131,15 @@ class Precision(unittest.TestCase):
         self.assertEqual(self.check(
             "void f(){ char *d = malloc(9);\n while (1) { free(d); break; }\n free(d); }"), {("CWE-415", "t.c", 3)})
 
+    def test_static_helper_in_own_file(self):
+        # two files each define static helper(); the call in a.c must go to a.c's helper only
+        d = Path(tempfile.mkdtemp())
+        (d / "a.c").write_text("static void helper(char *p)\n{\n    free(p);\n}\n"
+                               "void fa()\n{\n    char *p = malloc(4);\n    free(p);\n    helper(p);\n}\n")
+        (d / "b.c").write_text("static void helper(char *p)\n{\n    (void)0;\n}\n"
+                               "void fb()\n{\n    char *q = malloc(4);\n    free(q);\n    helper(q);\n}\n")
+        self.assertEqual(found(analyze(d, CACHE)), {("CWE-415", "a.c", 3)})
+
     def test_sizeof_is_not_a_tainted_length(self):
         self.assertEqual(self.check(
             "void f(char *d){ char s[9]; fgets(s, 9, stdin); memcpy(d, s, sizeof(s)); }"), set())
