@@ -84,15 +84,6 @@ def source_files(root: Path) -> list[Path]:
     return sorted(out)
 
 
-def fingerprint(root: Path, files: list[Path] | None = None) -> str:
-    """Names, sizes and modification times of the source files: unchanged means the analysis can be reused."""
-    h = hashlib.sha256()
-    for f in files if files is not None else source_files(root.resolve()):
-        st = f.stat()
-        h.update(f"{f}:{st.st_mtime_ns}:{st.st_size}\n".encode())
-    return h.hexdigest()[:16]
-
-
 @dataclass
 class Archive:
     root: Path
@@ -108,7 +99,11 @@ def run(root: Path, cache_dir: Path) -> Archive:
     files = source_files(root)
     if not files:
         raise RuntimeError(f"no C, C++ or Python files under {root}")
-    digest = fingerprint(root, files)
+    h = hashlib.sha256()
+    for f in files:
+        st = f.stat()
+        h.update(f"{f}:{st.st_mtime_ns}:{st.st_size}\n".encode())
+    digest = h.hexdigest()[:16]
     cache_dir = cache_dir.resolve()
     cache_dir.mkdir(parents=True, exist_ok=True)
     xml, out = cache_dir / f"{digest}.xml", cache_dir / f"{digest}.slices"
@@ -124,10 +119,7 @@ def run(root: Path, cache_dir: Path) -> Archive:
         if not _well_formed(xml):
             # srcML 1.1 can emit malformed XML for some inputs (an unclosed <attribute> for a function declared
             # with __attribute__((no_sanitize(..)))). Leave those files out and say so.
-            from concurrent.futures import ThreadPoolExecutor
-            with ThreadPoolExecutor(max_workers=os.cpu_count() or 4) as ex:
-                ok = list(ex.map(lambda f: _converts(cwd / f), rel))
-            skipped = [f for f, good in zip(rel, ok) if not good]
+            skipped = [f for f in rel if not _converts(cwd / f)]
             lst.write_text("\n".join(f for f in rel if f not in skipped) + "\n")
             subprocess.run(["srcml", "--position", "--files-from", str(lst), "-o", str(xml)], cwd=cwd,
                            check=True, capture_output=True)

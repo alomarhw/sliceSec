@@ -18,7 +18,7 @@ import traceback
 from pathlib import Path
 
 from .analysis import Analysis, analyze
-from .profiles import fingerprint, tool_versions
+from .profiles import tool_versions
 from .cli import CACHE
 
 
@@ -31,8 +31,6 @@ class Server:
 
     def _refresh(self) -> float:
         t = time.perf_counter()
-        if self.an is not None and fingerprint(self.root) == self.an.archive.digest:
-            return time.perf_counter() - t          # nothing changed: keep the analysis
         an = analyze(self.root, CACHE, self.max_hops)
         if self.an is None or an.archive.digest != self.an.archive.digest:
             self.an, self.findings = an, an.findings()

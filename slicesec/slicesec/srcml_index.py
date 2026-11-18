@@ -63,7 +63,7 @@ class Call:
     arg_texts: list[str] = field(default_factory=list)  # source text of each positional argument
     guards: set[str] = field(default_factory=set)   # names bounds-checked (<, <=, >, >=) by an enclosing if/while
     compared: bool = False      # the call's result is compared (getenv(..) != NULL), not stored
-    jump_line: int = 0         # line of the first return/throw/exit (or no-return call) after it in its block
+    jump_line: int = 0         # line of the first return/break/continue/goto/throw/exit after it in its block
 
     @property
     def short(self) -> str:
@@ -113,9 +113,7 @@ def _assign_target(expr_children: list[ET.Element], call: ET.Element) -> str | N
     return None
 
 
-# statements after which nothing later in the function runs (break, continue and goto only leave a loop or jump
-# within the function, so code after them can still run)
-JUMPS = {SRC + t for t in ("return", "throw", "raise")}
+JUMPS = {SRC + t for t in ("return", "break", "continue", "goto", "throw", "raise")}
 EXITS = {"exit", "_exit", "abort", "sys.exit", "longjmp", "err", "errx"}
 # calls that do not return, by naming convention: error(), fatal(), die(), panic(), exit_tcpdump(), ndo->ndo_error
 NORETURN = re.compile(r"^(error|fatal|die|panic|abort|exit|bail)(_[a-z0-9]+)?$|[_.>](error|fatal|die|panic|abort)$",

@@ -201,13 +201,7 @@ class Analysis:
     # ---- slices ------------------------------------------------------------------------------------------
     def own_lines(self, k: Key) -> list[int]:
         """k's def and use lines inside its own function (srcSlice also lists the lines of callees it reaches,
-        which the slice covers through the callee's own parameter node). Cached per variable."""
-        cache = self.__dict__.setdefault("_own", {})
-        if k not in cache:
-            cache[k] = self._own_lines(k)
-        return cache[k]
-
-    def _own_lines(self, k: Key) -> list[int]:
+        which the slice covers through the callee's own parameter node)."""
         p = self.prof[k]
         fn = next((f for f in self.fn_named.get(k[1], []) if f.file == k[0]
                    and any(f.start <= d <= f.end for d in p.defs)), None) if k[1] else None

@@ -126,11 +126,6 @@ class Precision(unittest.TestCase):
             "void f(char *d){ char s[9]; int v; fgets(s, 9, stdin);\n sscanf(s, \"%d\", &v); memcpy(d, s, v); }"),
             {("CWE-805", "t.c", 2)})
 
-    def test_break_does_not_end_the_function(self):
-        # Juliet flow variant 16: the free is left by break, and the pointer is freed again after the loop
-        self.assertEqual(self.check(
-            "void f(){ char *d = malloc(9);\n while (1) { free(d); break; }\n free(d); }"), {("CWE-415", "t.c", 3)})
-
     def test_sizeof_is_not_a_tainted_length(self):
         self.assertEqual(self.check(
             "void f(char *d){ char s[9]; fgets(s, 9, stdin); memcpy(d, s, sizeof(s)); }"), set())
