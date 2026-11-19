@@ -1,0 +1,920 @@
+# cfingerd 1.4.3 (CVE-2001-0609) before and after the Debian fix, 2026-11-18. Fetched by fetch_cfingerd.sh.
+## vulnerable: sliceSec
+
+24 findings in 22 files, 414 slice profiles
+src/main.c:139: error: CWE-120 unbounded-copy: untrusted data is copied without a bound (cp via fgets())
+    src/main.c:110  username         source: fgets()
+    src/main.c:64  cp               alias
+    src/main.c:139  cp               sink: strcpy argument 2
+src/main.c:140: error: CWE-120 unbounded-copy: untrusted data is copied without a bound (line via fgets())
+    src/main.c:110  username         source: fgets()
+    src/main.c:64  cp               alias
+    src/main.c:139  line             copy
+    src/main.c:140  line             sink: strcpy argument 2
+src/main.c:245: error: CWE-134 format-string: untrusted data is used as a format string (syslog_str via fgets())
+    src/main.c:110  username         source: fgets()
+    src/main.c:243  syslog_str       copy
+    src/main.c:245  syslog_str       sink: syslog argument 2
+src/main.c:258: error: CWE-134 format-string: untrusted data is used as a format string (syslog_str via fgets())
+    src/main.c:110  username         source: fgets()
+    src/main.c:243  syslog_str       copy
+    src/main.c:258  syslog_str       sink: syslog argument 2
+src/main.c:268: error: CWE-134 format-string: untrusted data is used as a format string (syslog_str via fgets())
+    src/main.c:110  username         source: fgets()
+    src/main.c:243  syslog_str       copy
+    src/main.c:268  syslog_str       sink: syslog argument 2
+src/parse.c:93: error: CWE-120 unbounded-copy: untrusted data is copied without a bound (username via fgets())
+    src/main.c:110  username         source: fgets()
+    src/main.c:237  username         passed to process_username()
+    src/parse.c:154  username         passed to search_fake()
+    src/parse.c:93  username         sink: strcpy argument 2
+src/search.c:48: error: CWE-120 unbounded-copy: untrusted data is copied without a bound (xp via fgets())
+    src/search.c:108  crappp           source: fgets()
+    src/search.c:110  un               copy
+    src/search.c:122  cp               alias
+    src/search.c:39  xp               alias
+    src/search.c:48  xp               sink: strcpy argument 2
+src/standard.c:526: error: CWE-120 unbounded-copy: untrusted data is formatted into a buffer without a bound (ut via read())
+    src/getutent.c:91  s_utmp           source: read()
+    src/standard.c:509  ut               return
+    src/standard.c:526  ut               sink: sprintf argument 3
+src/standard.c:852: error: CWE-805 tainted-length: an untrusted value is used as a copy length (x via fgets())
+    src/main.c:110  username         source: fgets()
+    src/main.c:261  username         passed to handle_standard()
+    src/standard.c:1018  user             passed to show_fingerinfo()
+    src/standard.c:815  pwent            alias
+    src/standard.c:822  cp               alias
+    src/standard.c:822  x                alias
+    src/standard.c:852  x                sink: memset argument 3
+src/standard.c:853: error: CWE-805 tainted-length: an untrusted value is used as a copy length (x via fgets())
+    src/main.c:110  username         source: fgets()
+    src/main.c:261  username         passed to handle_standard()
+    src/standard.c:1018  user             passed to show_fingerinfo()
+    src/standard.c:815  pwent            alias
+    src/standard.c:822  cp               alias
+    src/standard.c:822  x                alias
+    src/standard.c:853  x                sink: strncpy argument 3
+src/standard.c:858: error: CWE-805 tainted-length: an untrusted value is used as a copy length (x via fgets())
+    src/main.c:110  username         source: fgets()
+    src/main.c:261  username         passed to handle_standard()
+    src/standard.c:1018  user             passed to show_fingerinfo()
+    src/standard.c:815  pwent            alias
+    src/standard.c:822  cp               alias
+    src/standard.c:822  x                alias
+    src/standard.c:858  x                sink: memset argument 3
+src/standard.c:859: error: CWE-805 tainted-length: an untrusted value is used as a copy length (x via fgets())
+    src/main.c:110  username         source: fgets()
+    src/main.c:261  username         passed to handle_standard()
+    src/standard.c:1018  user             passed to show_fingerinfo()
+    src/standard.c:815  pwent            alias
+    src/standard.c:822  cp               alias
+    src/standard.c:822  x                alias
+    src/standard.c:859  x                sink: strncpy argument 3
+src/standard.c:864: error: CWE-805 tainted-length: an untrusted value is used as a copy length (x via fgets())
+    src/main.c:110  username         source: fgets()
+    src/main.c:261  username         passed to handle_standard()
+    src/standard.c:1018  user             passed to show_fingerinfo()
+    src/standard.c:815  pwent            alias
+    src/standard.c:822  cp               alias
+    src/standard.c:822  x                alias
+    src/standard.c:864  x                sink: memset argument 3
+src/standard.c:865: error: CWE-805 tainted-length: an untrusted value is used as a copy length (x via fgets())
+    src/main.c:110  username         source: fgets()
+    src/main.c:261  username         passed to handle_standard()
+    src/standard.c:1018  user             passed to show_fingerinfo()
+    src/standard.c:815  pwent            alias
+    src/standard.c:822  cp               alias
+    src/standard.c:822  x                alias
+    src/standard.c:865  x                sink: strncpy argument 3
+src/standard.c:870: error: CWE-805 tainted-length: an untrusted value is used as a copy length (x via fgets())
+    src/main.c:110  username         source: fgets()
+    src/main.c:261  username         passed to handle_standard()
+    src/standard.c:1018  user             passed to show_fingerinfo()
+    src/standard.c:815  pwent            alias
+    src/standard.c:822  cp               alias
+    src/standard.c:822  x                alias
+    src/standard.c:870  x                sink: memset argument 3
+src/standard.c:871: error: CWE-805 tainted-length: an untrusted value is used as a copy length (x via fgets())
+    src/main.c:110  username         source: fgets()
+    src/main.c:261  username         passed to handle_standard()
+    src/standard.c:1018  user             passed to show_fingerinfo()
+    src/standard.c:815  pwent            alias
+    src/standard.c:822  cp               alias
+    src/standard.c:822  x                alias
+    src/standard.c:871  x                sink: strncpy argument 3
+src/standard.c:878: error: CWE-120 unbounded-copy: untrusted data is copied without a bound (cp via fgets())
+    src/main.c:110  username         source: fgets()
+    src/main.c:261  username         passed to handle_standard()
+    src/standard.c:1018  user             passed to show_fingerinfo()
+    src/standard.c:815  pwent            alias
+    src/standard.c:822  cp               alias
+    src/standard.c:878  cp               sink: strcpy argument 2
+src/standard.c:883: error: CWE-120 unbounded-copy: untrusted data is copied without a bound (cp via fgets())
+    src/main.c:110  username         source: fgets()
+    src/main.c:261  username         passed to handle_standard()
+    src/standard.c:1018  user             passed to show_fingerinfo()
+    src/standard.c:815  pwent            alias
+    src/standard.c:822  cp               alias
+    src/standard.c:883  cp               sink: strcpy argument 2
+src/standard.c:891: error: CWE-120 unbounded-copy: untrusted data is copied without a bound (cp via fgets())
+    src/main.c:110  username         source: fgets()
+    src/main.c:261  username         passed to handle_standard()
+    src/standard.c:1018  user             passed to show_fingerinfo()
+    src/standard.c:815  pwent            alias
+    src/standard.c:822  cp               alias
+    src/standard.c:891  cp               sink: strcpy argument 2
+src/standard.c:988: error: CWE-120 unbounded-copy: untrusted data is copied without a bound (username via fgets())
+    src/main.c:110  username         source: fgets()
+    src/main.c:261  username         passed to handle_standard()
+    src/standard.c:988  username         sink: strcpy argument 2
+src/standard.c:989: error: CWE-120 unbounded-copy: untrusted data is copied without a bound (uname via fgets())
+    src/main.c:110  username         source: fgets()
+    src/main.c:261  username         passed to handle_standard()
+    src/standard.c:988  uname            copy
+    src/standard.c:989  uname            sink: strcpy argument 2
+src/strmcpy.c:39: error: CWE-120 unbounded-copy: untrusted data is copied without a bound (s via fscanf())
+    src/configure.c:194  line             source: fscanf()
+    src/configure.c:204  element          copy
+    src/configure.c:285  s                passed to strmcpy()
+    src/strmcpy.c:39  s                sink: strcpy argument 2
+src/util.c:301: error: CWE-134 format-string: untrusted data is used as a format string (displine via fgets())
+    src/util.c:318  line             source: fgets()
+    src/util.c:320  line             passed to parse_line()
+    src/util.c:163  allocation       dvar
+    src/util.c:153  displine         dvar
+    src/util.c:301  displine         sink: printf argument 1
+src/util.c:605: error: CWE-78 cmd-injection: untrusted data reaches a command interpreter (cmd via fgets())
+    src/main.c:110  username         source: fgets()
+    src/main.c:261  username         passed to handle_standard()
+    src/standard.c:988  uname            copy
+    src/standard.c:1006  cmd              passed to safe_exec()
+    src/util.c:605  cmd              sink: popen argument 1
+## vulnerable: flawfinder 2.0.20
+./src/util.c:167:18:  [5] (buffer) strncat:
+./src/util.c:195:15:  [5] (buffer) strncat:
+./src/util.c:212:19:  [5] (buffer) strncat:
+./src/util.c:228:19:  [5] (buffer) strncat:
+./src/util.c:238:19:  [5] (buffer) strncat:
+./src/util.c:254:19:  [5] (buffer) strncat:
+./src/util.c:264:19:  [5] (buffer) strncat:
+./src/cfingerd.h:48:9:  [4] (format) snprintf:
+./src/configure.c:767:2:  [4] (buffer) sprintf:
+./src/defines.h:22:8:  [4] (format) printf:
+./src/internal.c:37:6:  [4] (format) printf:
+./src/main.c:139:7:  [4] (buffer) strcpy:
+./src/main.c:140:7:  [4] (buffer) strcpy:
+./src/main.c:245:3:  [4] (format) syslog:
+./src/main.c:258:3:  [4] (format) syslog:
+./src/main.c:268:3:  [4] (format) syslog:
+./src/parse.c:93:7:  [4] (buffer) strcpy:
+./src/search.c:48:6:  [4] (buffer) strcpy:
+./src/search.c:148:7:  [4] (buffer) sprintf:
+./src/search.c:151:4:  [4] (buffer) sprintf:
+./src/standard.c:103:2:  [4] (format) printf:
+./src/standard.c:376:5:  [4] (buffer) sprintf:
+./src/standard.c:526:7:  [4] (buffer) sprintf:
+./src/standard.c:765:7:  [4] (format) printf:
+./src/standard.c:771:7:  [4] (format) printf:
+./src/standard.c:777:7:  [4] (format) printf:
+./src/standard.c:878:4:  [4] (buffer) strcpy:
+./src/standard.c:883:4:  [4] (buffer) strcpy:
+./src/standard.c:891:6:  [4] (buffer) strcpy:
+./src/standard.c:897:9:  [4] (buffer) sprintf:
+./src/standard.c:900:2:  [4] (buffer) sprintf:
+./src/standard.c:988:2:  [4] (buffer) strcpy:
+./src/standard.c:989:2:  [4] (buffer) strcpy:
+./src/strmcpy.c:39:12:  [4] (buffer) strcpy:
+./src/util.c:214:8:  [4] (format) printf:
+./src/util.c:230:8:  [4] (format) printf:
+./src/util.c:301:2:  [4] (format) printf:
+./src/util.c:595:3:  [4] (buffer) strcat:
+./src/util.c:605:9:  [4] (shell) popen:
+./userlist/display.c:39:5:  [4] (buffer) sprintf:
+./userlist/display.c:97:4:  [4] (buffer) strcpy:
+./userlist/userlist.h:51:9:  [4] (format) snprintf:
+./src/cfingerd.h:228:5:  [2] (buffer) char:
+./src/cfingerd.h:253:5:  [2] (buffer) char:
+./src/cfingerd.h:254:5:  [2] (buffer) char:
+./src/cfingerd.h:255:5:  [2] (buffer) char:
+./src/cfingerd.h:256:5:  [2] (buffer) char:
+./src/cfingerd.h:257:5:  [2] (buffer) char:
+./src/cfingerd.h:258:5:  [2] (buffer) char:
+./src/cfingerd.h:259:5:  [2] (buffer) char:
+./src/cfingerd.h:260:5:  [2] (buffer) char:
+./src/configure.c:221:17:  [2] (misc) fopen:
+./src/configure.c:629:39:  [2] (integer) atoi:
+./src/configure.c:631:42:  [2] (integer) atoi:
+./src/configure.c:633:41:  [2] (integer) atoi:
+./src/configure.c:686:12:  [2] (misc) fopen:
+./src/configure.c:728:2:  [2] (buffer) sprintf:
+./src/configure.c:734:2:  [2] (buffer) sprintf:
+./src/configure.c:740:2:  [2] (buffer) sprintf:
+./src/configure.c:752:2:  [2] (buffer) sprintf:
+./src/configure.c:753:2:  [2] (buffer) sprintf:
+./src/configure.c:754:2:  [2] (buffer) sprintf:
+./src/configure.c:761:2:  [2] (buffer) sprintf:
+./src/fakeuser.c:68:5:  [2] (buffer) char:
+./src/fakeuser.c:115:6:  [2] (buffer) char:
+./src/getutent.c:67:17:  [2] (misc) open:
+./src/log.c:47:5:  [2] (buffer) char:
+./src/log.c:63:13:  [2] (misc) fopen:
+./src/log.c:65:9:  [2] (misc) fopen:
+./src/main.c:62:5:  [2] (buffer) char:
+./src/main.c:221:2:  [2] (buffer) strcpy:
+./src/options.c:67:7:  [2] (misc) open:
+./src/options.c:173:46:  [2] (buffer) char:
+./src/options.c:174:46:  [2] (buffer) char:
+./src/rfc1413.c:33:5:  [2] (buffer) char:
+./src/search.c:21:5:  [2] (buffer) char:
+./src/search.c:22:5:  [2] (buffer) char:
+./src/search.c:92:12:  [2] (misc) fopen:
+./src/search.c:96:6:  [2] (buffer) char:
+./src/search.c:97:6:  [2] (buffer) char:
+./src/search.c:98:6:  [2] (buffer) char:
+./src/search.c:115:12:  [2] (integer) atoi:
+./src/search.c:116:12:  [2] (integer) atoi:
+./src/standard.c:33:5:  [2] (buffer) char:
+./src/standard.c:34:5:  [2] (buffer) char:
+./src/standard.c:89:5:  [2] (buffer) char:
+./src/standard.c:120:9:  [2] (misc) fopen:
+./src/standard.c:148:2:  [2] (buffer) char:
+./src/standard.c:200:2:  [2] (buffer) char:
+./src/standard.c:238:5:  [2] (buffer) char:
+./src/standard.c:249:10:  [2] (misc) open:
+./src/standard.c:374:5:  [2] (buffer) char:
+./src/standard.c:472:6:  [2] (buffer) char:
+./src/standard.c:477:19:  [2] (buffer) char:
+./src/standard.c:479:17:  [2] (buffer) char:
+./src/standard.c:483:16:  [2] (buffer) char:
+./src/standard.c:484:16:  [2] (buffer) char:
+./src/standard.c:485:9:  [2] (buffer) char:
+./src/standard.c:519:3:  [2] (buffer) char:
+./src/standard.c:578:5:  [2] (buffer) char:
+./src/standard.c:598:2:  [2] (buffer) char:
+./src/standard.c:646:7:  [2] (buffer) char:
+./src/standard.c:670:2:  [2] (buffer) char:
+./src/standard.c:691:6:  [2] (buffer) char:
+./src/standard.c:692:6:  [2] (buffer) char:
+./src/standard.c:703:12:  [2] (misc) fopen:
+./src/standard.c:756:8:  [2] (buffer) char:
+./src/standard.c:796:4:  [2] (buffer) char:
+./src/standard.c:818:5:  [2] (buffer) char:
+./src/standard.c:820:5:  [2] (buffer) char:
+./src/standard.c:912:17:  [2] (misc) fopen:
+./src/standard.c:973:5:  [2] (buffer) char:
+./src/userlist.c:43:2:  [2] (buffer) char:
+./src/util.c:104:5:  [2] (buffer) sprintf:
+./src/util.c:153:5:  [2] (buffer) char:
+./src/util.c:163:7:  [2] (buffer) char:
+./src/util.c:206:4:  [2] (buffer) char:
+./src/util.c:222:4:  [2] (buffer) char:
+./src/util.c:314:5:  [2] (buffer) char:
+./src/util.c:372:5:  [2] (buffer) char:
+./src/util.c:381:9:  [2] (buffer) char:
+./src/util.c:448:5:  [2] (buffer) sprintf:
+./src/util.c:460:5:  [2] (buffer) char:
+./src/util.c:566:5:  [2] (buffer) char:
+./src/util.c:637:10:  [2] (misc) fopen:
+./userlist/display.c:20:5:  [2] (buffer) sprintf:
+./userlist/display.c:28:5:  [2] (buffer) char:
+./userlist/display.c:50:12:  [2] (misc) fopen:
+./userlist/display.c:72:2:  [2] (buffer) char:
+./userlist/display.c:75:14:  [2] (buffer) char:
+./userlist/display.c:80:14:  [2] (buffer) char:
+./userlist/display.c:82:6:  [2] (buffer) char:
+./userlist/display.c:102:24:  [2] (buffer) char:
+./userlist/display.c:110:12:  [2] (buffer) char:
+./userlist/display.c:119:8:  [2] (buffer) char:
+./userlist/idle.c:19:12:  [2] (buffer) char:
+./userlist/idle.c:20:5:  [2] (buffer) char:
+./src/configure.c:328:21:  [1] (buffer) strlen:
+./src/configure.c:444:5:  [1] (buffer) strlen:
+./src/configure.c:507:5:  [1] (buffer) strlen:
+./src/configure.c:551:5:  [1] (buffer) strlen:
+./src/configure.c:579:5:  [1] (buffer) strlen:
+./src/configure.c:602:7:  [1] (buffer) strlen:
+./src/configure.c:603:17:  [1] (buffer) strlen:
+./src/configure.c:654:5:  [1] (buffer) strlen:
+./src/configure.c:695:23:  [1] (buffer) fgetc:
+./src/fakeuser.c:29:21:  [1] (buffer) strlen:
+./src/fakeuser.c:46:11:  [1] (buffer) strlen:
+./src/fakeuser.c:93:32:  [1] (buffer) strlen:
+./src/getutent.c:91:20:  [1] (buffer) read:
+./src/main.c:43:21:  [1] (buffer) strlen:
+./src/main.c:44:18:  [1] (buffer) strlen:
+./src/main.c:89:6:  [1] (buffer) strncpy:
+./src/main.c:136:10:  [1] (buffer) strlen:
+./src/main.c:205:43:  [1] (buffer) strlen:
+./src/parse.c:30:18:  [1] (buffer) strlen:
+./src/parse.c:54:18:  [1] (buffer) strlen:
+./src/parse.c:91:35:  [1] (buffer) strlen:
+./src/parse.c:92:26:  [1] (buffer) strlen:
+./src/parse.c:131:52:  [1] (buffer) strlen:
+./src/rfc1413.c:76:22:  [1] (buffer) strlen:
+./src/rfc1413.c:79:9:  [1] (buffer) read:
+./src/rfc1413.c:101:54:  [1] (buffer) strlen:
+./src/rfc1413.c:104:7:  [1] (buffer) strlen:
+./src/search.c:46:36:  [1] (buffer) strlen:
+./src/search.c:47:29:  [1] (buffer) strlen:
+./src/search.c:66:9:  [1] (buffer) strlen:
+./src/search.c:147:11:  [1] (buffer) strlen:
+./src/search.c:147:27:  [1] (buffer) strlen:
+./src/search.c:150:11:  [1] (buffer) strlen:
+./src/search.c:166:3:  [1] (buffer) strncpy:
+./src/search.c:167:3:  [1] (buffer) strncpy:
+./src/standard.c:101:63:  [1] (buffer) strlen:
+./src/standard.c:254:10:  [1] (buffer) read:
+./src/standard.c:258:46:  [1] (buffer) strlen:
+./src/standard.c:261:46:  [1] (buffer) strlen:
+./src/standard.c:262:3:  [1] (buffer) strncpy:
+./src/standard.c:265:3:  [1] (buffer) strncpy:
+./src/standard.c:285:6:  [1] (buffer) read:
+./src/standard.c:287:6:  [1] (buffer) strncpy:
+./src/standard.c:289:6:  [1] (buffer) strncpy:
+./src/standard.c:316:7:  [1] (buffer) strlen:
+./src/standard.c:317:7:  [1] (buffer) strlen:
+./src/standard.c:483:8:  [1] (buffer) strlen:
+./src/standard.c:484:8:  [1] (buffer) strlen:
+./src/standard.c:511:43:  [1] (buffer) strlen:
+./src/standard.c:512:4:  [1] (buffer) strlen:
+./src/standard.c:512:36:  [1] (buffer) strlen:
+./src/standard.c:515:47:  [1] (buffer) strlen:
+./src/standard.c:516:4:  [1] (buffer) strlen:
+./src/standard.c:516:36:  [1] (buffer) strlen:
+./src/standard.c:522:7:  [1] (buffer) strncpy:
+./src/standard.c:523:7:  [1] (buffer) strncpy:
+./src/standard.c:547:7:  [1] (buffer) strncpy:
+./src/standard.c:607:52:  [1] (buffer) strlen:
+./src/standard.c:613:25:  [1] (buffer) strlen:
+./src/standard.c:621:31:  [1] (buffer) strlen:
+./src/standard.c:732:14:  [1] (buffer) strlen:
+./src/standard.c:733:8:  [1] (buffer) strlen:
+./src/standard.c:737:14:  [1] (buffer) strlen:
+./src/standard.c:828:9:  [1] (buffer) strncpy:
+./src/standard.c:853:6:  [1] (buffer) strncpy:
+./src/standard.c:859:3:  [1] (buffer) strncpy:
+./src/standard.c:865:7:  [1] (buffer) strncpy:
+./src/standard.c:871:4:  [1] (buffer) strncpy:
+./src/standard.c:876:36:  [1] (buffer) strlen:
+./src/standard.c:877:22:  [1] (buffer) strlen:
+./src/standard.c:881:41:  [1] (buffer) strlen:
+./src/standard.c:882:27:  [1] (buffer) strlen:
+./src/standard.c:889:34:  [1] (buffer) strlen:
+./src/standard.c:890:27:  [1] (buffer) strlen:
+./src/standard.c:896:6:  [1] (buffer) strlen:
+./src/standard.c:896:28:  [1] (buffer) strlen:
+./src/standard.c:899:11:  [1] (buffer) strlen:
+./src/strmcpy.c:32:17:  [1] (buffer) strlen:
+./src/util.c:119:2:  [1] (buffer) strncpy:
+./src/util.c:120:2:  [1] (buffer) strncpy:
+./src/util.c:122:2:  [1] (buffer) strncpy:
+./src/util.c:123:2:  [1] (buffer) strncpy:
+./src/util.c:159:17:  [1] (buffer) strlen:
+./src/util.c:187:14:  [1] (buffer) strlen:
+./src/util.c:202:7:  [1] (buffer) strlen:
+./src/util.c:204:5:  [1] (buffer) strlen:
+./src/util.c:220:5:  [1] (buffer) strlen:
+./src/util.c:236:5:  [1] (buffer) strlen:
+./src/util.c:246:5:  [1] (buffer) strlen:
+./src/util.c:252:5:  [1] (buffer) strlen:
+./src/util.c:262:5:  [1] (buffer) strlen:
+./src/util.c:272:5:  [1] (buffer) strlen:
+./src/util.c:294:26:  [1] (buffer) strlen:
+./src/util.c:374:5:  [1] (buffer) strncpy:
+./src/util.c:383:29:  [1] (buffer) strlen:
+./src/util.c:465:27:  [1] (buffer) strlen:
+./src/util.c:466:6:  [1] (buffer) strlen:
+./src/util.c:589:10:  [1] (buffer) read:
+./src/util.c:590:19:  [1] (buffer) strlen:
+./src/util.c:611:23:  [1] (buffer) strlen:
+./src/util.c:622:10:  [1] (buffer) strlen:
+./userlist/display.c:37:27:  [1] (buffer) strlen:
+./userlist/display.c:75:6:  [1] (buffer) strlen:
+./userlist/display.c:80:6:  [1] (buffer) strlen:
+./userlist/display.c:87:6:  [1] (buffer) strncpy:
+./userlist/display.c:95:39:  [1] (buffer) strlen:
+./userlist/display.c:96:25:  [1] (buffer) strlen:
+./userlist/initialize.c:23:27:  [1] (buffer) strlen:
+./userlist/initialize.c:24:21:  [1] (buffer) strlen:
+./userlist/initialize.c:63:6:  [1] (buffer) strncpy:
+./userlist/initialize.c:65:6:  [1] (buffer) strncpy:
+./userlist/initialize.c:68:6:  [1] (buffer) strncpy:
+./userlist/initialize.c:78:6:  [1] (buffer) strncpy:
+./userlist/initialize.c:79:10:  [1] (buffer) strlen:
+./userlist/initialize.c:82:6:  [1] (buffer) strncpy:
+## vulnerable: Cppcheck 2.22.0 --enable=warning
+src/configure.c:180:5: warning: sscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/configure.c:194:2: warning: fscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/configure.c:204:3: warning: sscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/configure.c:260:7: warning: sscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/configure.c:282:3: warning: sscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/configure.c:349:5: warning: sscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/configure.c:363:2: warning: fscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/configure.c:370:6: warning: sscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/configure.c:400:5: warning: sscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/configure.c:438:3: warning: sscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/configure.c:502:3: warning: sscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/configure.c:533:3: warning: sscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/configure.c:545:3: warning: sscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/configure.c:573:3: warning: sscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/configure.c:600:3: warning: sscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/configure.c:626:3: warning: sscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/configure.c:648:3: warning: sscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/configure.c:180:41: warning: If memory allocation fails, then there is a possible null pointer dereference: line [nullPointerOutOfMemory]
+src/configure.c:194:31: warning: If memory allocation fails, then there is a possible null pointer dereference: line [nullPointerOutOfMemory]
+src/configure.c:204:48: warning: If memory allocation fails, then there is a possible null pointer dereference: element [nullPointerOutOfMemory]
+src/configure.c:204:57: warning: If memory allocation fails, then there is a possible null pointer dereference: filename [nullPointerOutOfMemory]
+src/configure.c:260:52: warning: If memory allocation fails, then there is a possible null pointer dereference: element [nullPointerOutOfMemory]
+src/configure.c:260:61: warning: If memory allocation fails, then there is a possible null pointer dereference: filename [nullPointerOutOfMemory]
+src/configure.c:283:4: warning: If memory allocation fails, then there is a possible null pointer dereference: element [nullPointerOutOfMemory]
+src/configure.c:283:13: warning: If memory allocation fails, then there is a possible null pointer dereference: fakename [nullPointerOutOfMemory]
+src/configure.c:283:23: warning: If memory allocation fails, then there is a possible null pointer dereference: boolean [nullPointerOutOfMemory]
+src/configure.c:283:32: warning: If memory allocation fails, then there is a possible null pointer dereference: filename [nullPointerOutOfMemory]
+src/configure.c:349:41: warning: If memory allocation fails, then there is a possible null pointer dereference: line [nullPointerOutOfMemory]
+src/configure.c:363:31: warning: If memory allocation fails, then there is a possible null pointer dereference: line [nullPointerOutOfMemory]
+src/configure.c:370:39: warning: If memory allocation fails, then there is a possible null pointer dereference: host [nullPointerOutOfMemory]
+src/configure.c:400:42: warning: If memory allocation fails, then there is a possible null pointer dereference: line [nullPointerOutOfMemory]
+src/configure.c:425:8: warning: If memory allocation fails, then there is a possible null pointer dereference: line [nullPointerOutOfMemory]
+src/configure.c:439:4: warning: If memory allocation fails, then there is a possible null pointer dereference: opt3 [nullPointerOutOfMemory]
+src/configure.c:439:10: warning: If memory allocation fails, then there is a possible null pointer dereference: element [nullPointerOutOfMemory]
+src/configure.c:439:19: warning: If memory allocation fails, then there is a possible null pointer dereference: opt1 [nullPointerOutOfMemory]
+src/configure.c:439:25: warning: If memory allocation fails, then there is a possible null pointer dereference: opt2 [nullPointerOutOfMemory]
+src/configure.c:502:41: warning: If memory allocation fails, then there is a possible null pointer dereference: opt [nullPointerOutOfMemory]
+src/configure.c:502:46: warning: If memory allocation fails, then there is a possible null pointer dereference: element [nullPointerOutOfMemory]
+src/configure.c:533:36: warning: If memory allocation fails, then there is a possible null pointer dereference: element [nullPointerOutOfMemory]
+src/configure.c:546:4: warning: If memory allocation fails, then there is a possible null pointer dereference: element [nullPointerOutOfMemory]
+src/configure.c:546:13: warning: If memory allocation fails, then there is a possible null pointer dereference: string [nullPointerOutOfMemory]
+src/configure.c:574:4: warning: If memory allocation fails, then there is a possible null pointer dereference: element [nullPointerOutOfMemory]
+src/configure.c:574:13: warning: If memory allocation fails, then there is a possible null pointer dereference: string [nullPointerOutOfMemory]
+src/configure.c:600:32: warning: If memory allocation fails, then there is a possible null pointer dereference: element [nullPointerOutOfMemory]
+src/configure.c:626:46: warning: If memory allocation fails, then there is a possible null pointer dereference: element [nullPointerOutOfMemory]
+src/configure.c:626:55: warning: If memory allocation fails, then there is a possible null pointer dereference: num [nullPointerOutOfMemory]
+src/configure.c:649:4: warning: If memory allocation fails, then there is a possible null pointer dereference: element [nullPointerOutOfMemory]
+src/configure.c:649:13: warning: If memory allocation fails, then there is a possible null pointer dereference: string [nullPointerOutOfMemory]
+src/configure.c:713:9: warning: If memory allocation fails, then there is a possible null pointer dereference: line [nullPointerOutOfMemory]
+src/configure.c:698:10: warning: Storing fgetc() return value in char variable and then comparing with EOF. [checkCastIntToCharAndBack]
+src/fakeuser.c:96:6: warning: sscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/fakeuser.c:98:6: warning: sscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/fakeuser.c:100:6: warning: sscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/fakeuser.c:102:6: warning: sscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/fakeuser.c:105:6: warning: sscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/main.c:145:2: warning: sscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/main.c:220:10: warning: If memory allocation fails, then there is a possible null pointer dereference: ident_user [nullPointerOutOfMemory]
+src/main.c:221:10: warning: If memory allocation fails, then there is a possible null pointer dereference: ident_user [nullPointerOutOfMemory]
+src/main.c:220:10: warning: Size of pointer 'ident_user' used instead of size of its data. [pointerSize]
+src/rfc1413.c:38:12: warning: If memory allocation fails, then there is a possible null pointer dereference: bleah [nullPointerOutOfMemory]
+src/search.c:94:8: warning: Using feof() as a loop condition causes the last line to be processed twice. [wrongfeofUsage]
+src/search.c:110:6: warning: sscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/standard.c:306:9: error: Uninitialized struct member: last_tty.time [uninitStructMember]
+src/util.c:608:13: warning: Using feof() as a loop condition causes the last line to be processed twice. [wrongfeofUsage]
+src/util.c:592:8: error: Common realloc mistake: 'result' nulled but not freed upon failure [memleakOnRealloc]
+src/util.c:157:12: warning: If memory allocation fails, then there is a possible null pointer dereference: displine [nullPointerOutOfMemory]
+src/util.c:468:14: warning: If memory allocation fails, then there is a possible null pointer dereference: ret [nullPointerOutOfMemory]
+## fixed: sliceSec
+
+20 findings in 22 files, 414 slice profiles
+src/main.c:139: error: CWE-120 unbounded-copy: untrusted data is copied without a bound (cp via fgets())
+    src/main.c:110  username         source: fgets()
+    src/main.c:64  cp               alias
+    src/main.c:139  cp               sink: strcpy argument 2
+src/main.c:140: error: CWE-120 unbounded-copy: untrusted data is copied without a bound (line via fgets())
+    src/main.c:110  username         source: fgets()
+    src/main.c:64  cp               alias
+    src/main.c:139  line             copy
+    src/main.c:140  line             sink: strcpy argument 2
+src/parse.c:93: error: CWE-120 unbounded-copy: untrusted data is copied without a bound (username via fgets())
+    src/main.c:110  username         source: fgets()
+    src/main.c:237  username         passed to process_username()
+    src/parse.c:154  username         passed to search_fake()
+    src/parse.c:93  username         sink: strcpy argument 2
+src/search.c:48: error: CWE-120 unbounded-copy: untrusted data is copied without a bound (xp via fgets())
+    src/search.c:108  crappp           source: fgets()
+    src/search.c:110  un               copy
+    src/search.c:122  cp               alias
+    src/search.c:39  xp               alias
+    src/search.c:48  xp               sink: strcpy argument 2
+src/standard.c:526: error: CWE-120 unbounded-copy: untrusted data is formatted into a buffer without a bound (ut via read())
+    src/getutent.c:91  s_utmp           source: read()
+    src/standard.c:509  ut               return
+    src/standard.c:526  ut               sink: sprintf argument 3
+src/standard.c:852: error: CWE-805 tainted-length: an untrusted value is used as a copy length (x via fgets())
+    src/main.c:110  username         source: fgets()
+    src/main.c:261  username         passed to handle_standard()
+    src/standard.c:1018  user             passed to show_fingerinfo()
+    src/standard.c:815  pwent            alias
+    src/standard.c:822  cp               alias
+    src/standard.c:822  x                alias
+    src/standard.c:852  x                sink: memset argument 3
+src/standard.c:853: error: CWE-805 tainted-length: an untrusted value is used as a copy length (x via fgets())
+    src/main.c:110  username         source: fgets()
+    src/main.c:261  username         passed to handle_standard()
+    src/standard.c:1018  user             passed to show_fingerinfo()
+    src/standard.c:815  pwent            alias
+    src/standard.c:822  cp               alias
+    src/standard.c:822  x                alias
+    src/standard.c:853  x                sink: strncpy argument 3
+src/standard.c:858: error: CWE-805 tainted-length: an untrusted value is used as a copy length (x via fgets())
+    src/main.c:110  username         source: fgets()
+    src/main.c:261  username         passed to handle_standard()
+    src/standard.c:1018  user             passed to show_fingerinfo()
+    src/standard.c:815  pwent            alias
+    src/standard.c:822  cp               alias
+    src/standard.c:822  x                alias
+    src/standard.c:858  x                sink: memset argument 3
+src/standard.c:859: error: CWE-805 tainted-length: an untrusted value is used as a copy length (x via fgets())
+    src/main.c:110  username         source: fgets()
+    src/main.c:261  username         passed to handle_standard()
+    src/standard.c:1018  user             passed to show_fingerinfo()
+    src/standard.c:815  pwent            alias
+    src/standard.c:822  cp               alias
+    src/standard.c:822  x                alias
+    src/standard.c:859  x                sink: strncpy argument 3
+src/standard.c:864: error: CWE-805 tainted-length: an untrusted value is used as a copy length (x via fgets())
+    src/main.c:110  username         source: fgets()
+    src/main.c:261  username         passed to handle_standard()
+    src/standard.c:1018  user             passed to show_fingerinfo()
+    src/standard.c:815  pwent            alias
+    src/standard.c:822  cp               alias
+    src/standard.c:822  x                alias
+    src/standard.c:864  x                sink: memset argument 3
+src/standard.c:865: error: CWE-805 tainted-length: an untrusted value is used as a copy length (x via fgets())
+    src/main.c:110  username         source: fgets()
+    src/main.c:261  username         passed to handle_standard()
+    src/standard.c:1018  user             passed to show_fingerinfo()
+    src/standard.c:815  pwent            alias
+    src/standard.c:822  cp               alias
+    src/standard.c:822  x                alias
+    src/standard.c:865  x                sink: strncpy argument 3
+src/standard.c:870: error: CWE-805 tainted-length: an untrusted value is used as a copy length (x via fgets())
+    src/main.c:110  username         source: fgets()
+    src/main.c:261  username         passed to handle_standard()
+    src/standard.c:1018  user             passed to show_fingerinfo()
+    src/standard.c:815  pwent            alias
+    src/standard.c:822  cp               alias
+    src/standard.c:822  x                alias
+    src/standard.c:870  x                sink: memset argument 3
+src/standard.c:871: error: CWE-805 tainted-length: an untrusted value is used as a copy length (x via fgets())
+    src/main.c:110  username         source: fgets()
+    src/main.c:261  username         passed to handle_standard()
+    src/standard.c:1018  user             passed to show_fingerinfo()
+    src/standard.c:815  pwent            alias
+    src/standard.c:822  cp               alias
+    src/standard.c:822  x                alias
+    src/standard.c:871  x                sink: strncpy argument 3
+src/standard.c:878: error: CWE-120 unbounded-copy: untrusted data is copied without a bound (cp via fgets())
+    src/main.c:110  username         source: fgets()
+    src/main.c:261  username         passed to handle_standard()
+    src/standard.c:1018  user             passed to show_fingerinfo()
+    src/standard.c:815  pwent            alias
+    src/standard.c:822  cp               alias
+    src/standard.c:878  cp               sink: strcpy argument 2
+src/standard.c:883: error: CWE-120 unbounded-copy: untrusted data is copied without a bound (cp via fgets())
+    src/main.c:110  username         source: fgets()
+    src/main.c:261  username         passed to handle_standard()
+    src/standard.c:1018  user             passed to show_fingerinfo()
+    src/standard.c:815  pwent            alias
+    src/standard.c:822  cp               alias
+    src/standard.c:883  cp               sink: strcpy argument 2
+src/standard.c:891: error: CWE-120 unbounded-copy: untrusted data is copied without a bound (cp via fgets())
+    src/main.c:110  username         source: fgets()
+    src/main.c:261  username         passed to handle_standard()
+    src/standard.c:1018  user             passed to show_fingerinfo()
+    src/standard.c:815  pwent            alias
+    src/standard.c:822  cp               alias
+    src/standard.c:891  cp               sink: strcpy argument 2
+src/standard.c:988: error: CWE-120 unbounded-copy: untrusted data is copied without a bound (username via fgets())
+    src/main.c:110  username         source: fgets()
+    src/main.c:261  username         passed to handle_standard()
+    src/standard.c:988  username         sink: strcpy argument 2
+src/standard.c:989: error: CWE-120 unbounded-copy: untrusted data is copied without a bound (uname via fgets())
+    src/main.c:110  username         source: fgets()
+    src/main.c:261  username         passed to handle_standard()
+    src/standard.c:988  uname            copy
+    src/standard.c:989  uname            sink: strcpy argument 2
+src/strmcpy.c:39: error: CWE-120 unbounded-copy: untrusted data is copied without a bound (s via fscanf())
+    src/configure.c:194  line             source: fscanf()
+    src/configure.c:204  element          copy
+    src/configure.c:285  s                passed to strmcpy()
+    src/strmcpy.c:39  s                sink: strcpy argument 2
+src/util.c:607: error: CWE-78 cmd-injection: untrusted data reaches a command interpreter (cmd via fgets())
+    src/main.c:110  username         source: fgets()
+    src/main.c:261  username         passed to handle_standard()
+    src/standard.c:988  uname            copy
+    src/standard.c:1006  cmd              passed to safe_exec()
+    src/util.c:607  cmd              sink: popen argument 1
+## fixed: flawfinder 2.0.20
+./src/util.c:167:18:  [5] (buffer) strncat:
+./src/util.c:195:15:  [5] (buffer) strncat:
+./src/util.c:212:19:  [5] (buffer) strncat:
+./src/util.c:228:19:  [5] (buffer) strncat:
+./src/util.c:238:19:  [5] (buffer) strncat:
+./src/util.c:254:19:  [5] (buffer) strncat:
+./src/util.c:264:19:  [5] (buffer) strncat:
+./src/cfingerd.h:48:9:  [4] (format) snprintf:
+./src/configure.c:768:2:  [4] (buffer) sprintf:
+./src/defines.h:22:8:  [4] (format) printf:
+./src/internal.c:37:6:  [4] (format) printf:
+./src/main.c:139:7:  [4] (buffer) strcpy:
+./src/main.c:140:7:  [4] (buffer) strcpy:
+./src/parse.c:93:7:  [4] (buffer) strcpy:
+./src/search.c:48:6:  [4] (buffer) strcpy:
+./src/search.c:148:7:  [4] (buffer) sprintf:
+./src/search.c:151:4:  [4] (buffer) sprintf:
+./src/standard.c:103:2:  [4] (format) printf:
+./src/standard.c:376:5:  [4] (buffer) sprintf:
+./src/standard.c:526:7:  [4] (buffer) sprintf:
+./src/standard.c:765:7:  [4] (format) printf:
+./src/standard.c:771:7:  [4] (format) printf:
+./src/standard.c:777:7:  [4] (format) printf:
+./src/standard.c:878:4:  [4] (buffer) strcpy:
+./src/standard.c:883:4:  [4] (buffer) strcpy:
+./src/standard.c:891:6:  [4] (buffer) strcpy:
+./src/standard.c:897:9:  [4] (buffer) sprintf:
+./src/standard.c:900:2:  [4] (buffer) sprintf:
+./src/standard.c:988:2:  [4] (buffer) strcpy:
+./src/standard.c:989:2:  [4] (buffer) strcpy:
+./src/strmcpy.c:39:12:  [4] (buffer) strcpy:
+./src/util.c:214:8:  [4] (format) printf:
+./src/util.c:230:8:  [4] (format) printf:
+./src/util.c:597:3:  [4] (buffer) strcat:
+./src/util.c:607:9:  [4] (shell) popen:
+./userlist/display.c:39:5:  [4] (buffer) sprintf:
+./userlist/display.c:99:4:  [4] (buffer) strcpy:
+./userlist/userlist.h:51:9:  [4] (format) snprintf:
+./src/cfingerd.h:228:5:  [2] (buffer) char:
+./src/cfingerd.h:253:5:  [2] (buffer) char:
+./src/cfingerd.h:254:5:  [2] (buffer) char:
+./src/cfingerd.h:255:5:  [2] (buffer) char:
+./src/cfingerd.h:256:5:  [2] (buffer) char:
+./src/cfingerd.h:257:5:  [2] (buffer) char:
+./src/cfingerd.h:258:5:  [2] (buffer) char:
+./src/cfingerd.h:259:5:  [2] (buffer) char:
+./src/cfingerd.h:260:5:  [2] (buffer) char:
+./src/configure.c:221:17:  [2] (misc) fopen:
+./src/configure.c:629:39:  [2] (integer) atoi:
+./src/configure.c:631:42:  [2] (integer) atoi:
+./src/configure.c:633:41:  [2] (integer) atoi:
+./src/configure.c:686:12:  [2] (misc) fopen:
+./src/configure.c:729:2:  [2] (buffer) sprintf:
+./src/configure.c:735:2:  [2] (buffer) sprintf:
+./src/configure.c:741:2:  [2] (buffer) sprintf:
+./src/configure.c:753:2:  [2] (buffer) sprintf:
+./src/configure.c:754:2:  [2] (buffer) sprintf:
+./src/configure.c:755:2:  [2] (buffer) sprintf:
+./src/configure.c:762:2:  [2] (buffer) sprintf:
+./src/fakeuser.c:68:5:  [2] (buffer) char:
+./src/fakeuser.c:115:6:  [2] (buffer) char:
+./src/getutent.c:67:17:  [2] (misc) open:
+./src/log.c:47:5:  [2] (buffer) char:
+./src/log.c:63:13:  [2] (misc) fopen:
+./src/log.c:65:9:  [2] (misc) fopen:
+./src/main.c:62:5:  [2] (buffer) char:
+./src/main.c:221:2:  [2] (buffer) strcpy:
+./src/options.c:67:7:  [2] (misc) open:
+./src/options.c:173:46:  [2] (buffer) char:
+./src/options.c:174:46:  [2] (buffer) char:
+./src/rfc1413.c:33:5:  [2] (buffer) char:
+./src/search.c:21:5:  [2] (buffer) char:
+./src/search.c:22:5:  [2] (buffer) char:
+./src/search.c:92:12:  [2] (misc) fopen:
+./src/search.c:96:6:  [2] (buffer) char:
+./src/search.c:97:6:  [2] (buffer) char:
+./src/search.c:98:6:  [2] (buffer) char:
+./src/search.c:115:12:  [2] (integer) atoi:
+./src/search.c:116:12:  [2] (integer) atoi:
+./src/standard.c:33:5:  [2] (buffer) char:
+./src/standard.c:34:5:  [2] (buffer) char:
+./src/standard.c:89:5:  [2] (buffer) char:
+./src/standard.c:120:9:  [2] (misc) fopen:
+./src/standard.c:148:2:  [2] (buffer) char:
+./src/standard.c:200:2:  [2] (buffer) char:
+./src/standard.c:238:5:  [2] (buffer) char:
+./src/standard.c:249:10:  [2] (misc) open:
+./src/standard.c:374:5:  [2] (buffer) char:
+./src/standard.c:472:6:  [2] (buffer) char:
+./src/standard.c:477:19:  [2] (buffer) char:
+./src/standard.c:479:17:  [2] (buffer) char:
+./src/standard.c:483:16:  [2] (buffer) char:
+./src/standard.c:484:16:  [2] (buffer) char:
+./src/standard.c:485:9:  [2] (buffer) char:
+./src/standard.c:519:3:  [2] (buffer) char:
+./src/standard.c:578:5:  [2] (buffer) char:
+./src/standard.c:598:2:  [2] (buffer) char:
+./src/standard.c:646:7:  [2] (buffer) char:
+./src/standard.c:670:2:  [2] (buffer) char:
+./src/standard.c:691:6:  [2] (buffer) char:
+./src/standard.c:692:6:  [2] (buffer) char:
+./src/standard.c:703:12:  [2] (misc) fopen:
+./src/standard.c:756:8:  [2] (buffer) char:
+./src/standard.c:796:4:  [2] (buffer) char:
+./src/standard.c:818:5:  [2] (buffer) char:
+./src/standard.c:820:5:  [2] (buffer) char:
+./src/standard.c:912:17:  [2] (misc) fopen:
+./src/standard.c:973:5:  [2] (buffer) char:
+./src/userlist.c:43:2:  [2] (buffer) char:
+./src/util.c:104:5:  [2] (buffer) sprintf:
+./src/util.c:153:5:  [2] (buffer) char:
+./src/util.c:163:7:  [2] (buffer) char:
+./src/util.c:206:4:  [2] (buffer) char:
+./src/util.c:222:4:  [2] (buffer) char:
+./src/util.c:314:5:  [2] (buffer) char:
+./src/util.c:372:5:  [2] (buffer) char:
+./src/util.c:381:9:  [2] (buffer) char:
+./src/util.c:448:5:  [2] (buffer) sprintf:
+./src/util.c:460:5:  [2] (buffer) char:
+./src/util.c:566:5:  [2] (buffer) char:
+./src/util.c:639:10:  [2] (misc) fopen:
+./userlist/display.c:20:5:  [2] (buffer) sprintf:
+./userlist/display.c:28:5:  [2] (buffer) char:
+./userlist/display.c:50:12:  [2] (misc) fopen:
+./userlist/display.c:72:2:  [2] (buffer) char:
+./userlist/display.c:75:14:  [2] (buffer) char:
+./userlist/display.c:80:14:  [2] (buffer) char:
+./userlist/display.c:82:6:  [2] (buffer) char:
+./userlist/display.c:104:24:  [2] (buffer) char:
+./userlist/display.c:112:12:  [2] (buffer) char:
+./userlist/display.c:121:8:  [2] (buffer) char:
+./userlist/idle.c:19:12:  [2] (buffer) char:
+./userlist/idle.c:20:5:  [2] (buffer) char:
+./src/configure.c:328:21:  [1] (buffer) strlen:
+./src/configure.c:444:5:  [1] (buffer) strlen:
+./src/configure.c:507:5:  [1] (buffer) strlen:
+./src/configure.c:551:5:  [1] (buffer) strlen:
+./src/configure.c:579:5:  [1] (buffer) strlen:
+./src/configure.c:602:7:  [1] (buffer) strlen:
+./src/configure.c:603:17:  [1] (buffer) strlen:
+./src/configure.c:654:5:  [1] (buffer) strlen:
+./src/configure.c:696:15:  [1] (buffer) fgetc:
+./src/fakeuser.c:29:21:  [1] (buffer) strlen:
+./src/fakeuser.c:46:11:  [1] (buffer) strlen:
+./src/fakeuser.c:93:32:  [1] (buffer) strlen:
+./src/getutent.c:91:20:  [1] (buffer) read:
+./src/main.c:43:21:  [1] (buffer) strlen:
+./src/main.c:44:18:  [1] (buffer) strlen:
+./src/main.c:89:6:  [1] (buffer) strncpy:
+./src/main.c:136:10:  [1] (buffer) strlen:
+./src/main.c:205:43:  [1] (buffer) strlen:
+./src/parse.c:30:18:  [1] (buffer) strlen:
+./src/parse.c:54:18:  [1] (buffer) strlen:
+./src/parse.c:91:35:  [1] (buffer) strlen:
+./src/parse.c:92:26:  [1] (buffer) strlen:
+./src/parse.c:131:52:  [1] (buffer) strlen:
+./src/rfc1413.c:76:22:  [1] (buffer) strlen:
+./src/rfc1413.c:79:9:  [1] (buffer) read:
+./src/rfc1413.c:101:66:  [1] (buffer) strlen:
+./src/rfc1413.c:105:7:  [1] (buffer) strlen:
+./src/search.c:46:36:  [1] (buffer) strlen:
+./src/search.c:47:29:  [1] (buffer) strlen:
+./src/search.c:66:9:  [1] (buffer) strlen:
+./src/search.c:147:11:  [1] (buffer) strlen:
+./src/search.c:147:27:  [1] (buffer) strlen:
+./src/search.c:150:11:  [1] (buffer) strlen:
+./src/search.c:166:3:  [1] (buffer) strncpy:
+./src/search.c:167:3:  [1] (buffer) strncpy:
+./src/standard.c:101:63:  [1] (buffer) strlen:
+./src/standard.c:254:10:  [1] (buffer) read:
+./src/standard.c:258:46:  [1] (buffer) strlen:
+./src/standard.c:261:46:  [1] (buffer) strlen:
+./src/standard.c:262:3:  [1] (buffer) strncpy:
+./src/standard.c:265:3:  [1] (buffer) strncpy:
+./src/standard.c:285:6:  [1] (buffer) read:
+./src/standard.c:287:6:  [1] (buffer) strncpy:
+./src/standard.c:289:6:  [1] (buffer) strncpy:
+./src/standard.c:316:7:  [1] (buffer) strlen:
+./src/standard.c:317:7:  [1] (buffer) strlen:
+./src/standard.c:483:8:  [1] (buffer) strlen:
+./src/standard.c:484:8:  [1] (buffer) strlen:
+./src/standard.c:511:43:  [1] (buffer) strlen:
+./src/standard.c:512:4:  [1] (buffer) strlen:
+./src/standard.c:512:36:  [1] (buffer) strlen:
+./src/standard.c:515:47:  [1] (buffer) strlen:
+./src/standard.c:516:4:  [1] (buffer) strlen:
+./src/standard.c:516:36:  [1] (buffer) strlen:
+./src/standard.c:522:7:  [1] (buffer) strncpy:
+./src/standard.c:523:7:  [1] (buffer) strncpy:
+./src/standard.c:547:7:  [1] (buffer) strncpy:
+./src/standard.c:607:52:  [1] (buffer) strlen:
+./src/standard.c:613:25:  [1] (buffer) strlen:
+./src/standard.c:621:31:  [1] (buffer) strlen:
+./src/standard.c:732:14:  [1] (buffer) strlen:
+./src/standard.c:733:8:  [1] (buffer) strlen:
+./src/standard.c:737:14:  [1] (buffer) strlen:
+./src/standard.c:828:9:  [1] (buffer) strncpy:
+./src/standard.c:853:6:  [1] (buffer) strncpy:
+./src/standard.c:859:3:  [1] (buffer) strncpy:
+./src/standard.c:865:7:  [1] (buffer) strncpy:
+./src/standard.c:871:4:  [1] (buffer) strncpy:
+./src/standard.c:876:36:  [1] (buffer) strlen:
+./src/standard.c:877:22:  [1] (buffer) strlen:
+./src/standard.c:881:41:  [1] (buffer) strlen:
+./src/standard.c:882:27:  [1] (buffer) strlen:
+./src/standard.c:889:34:  [1] (buffer) strlen:
+./src/standard.c:890:27:  [1] (buffer) strlen:
+./src/standard.c:896:6:  [1] (buffer) strlen:
+./src/standard.c:896:28:  [1] (buffer) strlen:
+./src/standard.c:899:11:  [1] (buffer) strlen:
+./src/strmcpy.c:32:17:  [1] (buffer) strlen:
+./src/util.c:119:2:  [1] (buffer) strncpy:
+./src/util.c:120:2:  [1] (buffer) strncpy:
+./src/util.c:122:2:  [1] (buffer) strncpy:
+./src/util.c:123:2:  [1] (buffer) strncpy:
+./src/util.c:159:17:  [1] (buffer) strlen:
+./src/util.c:187:14:  [1] (buffer) strlen:
+./src/util.c:202:7:  [1] (buffer) strlen:
+./src/util.c:204:5:  [1] (buffer) strlen:
+./src/util.c:220:5:  [1] (buffer) strlen:
+./src/util.c:236:5:  [1] (buffer) strlen:
+./src/util.c:246:5:  [1] (buffer) strlen:
+./src/util.c:252:5:  [1] (buffer) strlen:
+./src/util.c:262:5:  [1] (buffer) strlen:
+./src/util.c:272:5:  [1] (buffer) strlen:
+./src/util.c:294:26:  [1] (buffer) strlen:
+./src/util.c:374:5:  [1] (buffer) strncpy:
+./src/util.c:383:29:  [1] (buffer) strlen:
+./src/util.c:465:27:  [1] (buffer) strlen:
+./src/util.c:466:6:  [1] (buffer) strlen:
+./src/util.c:589:10:  [1] (buffer) read:
+./src/util.c:590:19:  [1] (buffer) strlen:
+./src/util.c:613:23:  [1] (buffer) strlen:
+./src/util.c:624:10:  [1] (buffer) strlen:
+./userlist/display.c:37:27:  [1] (buffer) strlen:
+./userlist/display.c:75:6:  [1] (buffer) strlen:
+./userlist/display.c:80:6:  [1] (buffer) strlen:
+./userlist/display.c:87:6:  [1] (buffer) strncpy:
+./userlist/display.c:97:39:  [1] (buffer) strlen:
+./userlist/display.c:98:25:  [1] (buffer) strlen:
+./userlist/initialize.c:23:27:  [1] (buffer) strlen:
+./userlist/initialize.c:24:21:  [1] (buffer) strlen:
+./userlist/initialize.c:63:6:  [1] (buffer) strncpy:
+./userlist/initialize.c:65:6:  [1] (buffer) strncpy:
+./userlist/initialize.c:68:6:  [1] (buffer) strncpy:
+./userlist/initialize.c:78:6:  [1] (buffer) strncpy:
+./userlist/initialize.c:79:10:  [1] (buffer) strlen:
+./userlist/initialize.c:82:6:  [1] (buffer) strncpy:
+## fixed: Cppcheck 2.22.0 --enable=warning
+src/configure.c:180:5: warning: sscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/configure.c:194:2: warning: fscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/configure.c:204:3: warning: sscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/configure.c:260:7: warning: sscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/configure.c:282:3: warning: sscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/configure.c:349:5: warning: sscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/configure.c:363:2: warning: fscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/configure.c:370:6: warning: sscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/configure.c:400:5: warning: sscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/configure.c:438:3: warning: sscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/configure.c:502:3: warning: sscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/configure.c:533:3: warning: sscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/configure.c:545:3: warning: sscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/configure.c:573:3: warning: sscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/configure.c:600:3: warning: sscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/configure.c:626:3: warning: sscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/configure.c:648:3: warning: sscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/configure.c:180:41: warning: If memory allocation fails, then there is a possible null pointer dereference: line [nullPointerOutOfMemory]
+src/configure.c:194:31: warning: If memory allocation fails, then there is a possible null pointer dereference: line [nullPointerOutOfMemory]
+src/configure.c:204:48: warning: If memory allocation fails, then there is a possible null pointer dereference: element [nullPointerOutOfMemory]
+src/configure.c:204:57: warning: If memory allocation fails, then there is a possible null pointer dereference: filename [nullPointerOutOfMemory]
+src/configure.c:260:52: warning: If memory allocation fails, then there is a possible null pointer dereference: element [nullPointerOutOfMemory]
+src/configure.c:260:61: warning: If memory allocation fails, then there is a possible null pointer dereference: filename [nullPointerOutOfMemory]
+src/configure.c:283:4: warning: If memory allocation fails, then there is a possible null pointer dereference: element [nullPointerOutOfMemory]
+src/configure.c:283:13: warning: If memory allocation fails, then there is a possible null pointer dereference: fakename [nullPointerOutOfMemory]
+src/configure.c:283:23: warning: If memory allocation fails, then there is a possible null pointer dereference: boolean [nullPointerOutOfMemory]
+src/configure.c:283:32: warning: If memory allocation fails, then there is a possible null pointer dereference: filename [nullPointerOutOfMemory]
+src/configure.c:349:41: warning: If memory allocation fails, then there is a possible null pointer dereference: line [nullPointerOutOfMemory]
+src/configure.c:363:31: warning: If memory allocation fails, then there is a possible null pointer dereference: line [nullPointerOutOfMemory]
+src/configure.c:370:39: warning: If memory allocation fails, then there is a possible null pointer dereference: host [nullPointerOutOfMemory]
+src/configure.c:400:42: warning: If memory allocation fails, then there is a possible null pointer dereference: line [nullPointerOutOfMemory]
+src/configure.c:425:8: warning: If memory allocation fails, then there is a possible null pointer dereference: line [nullPointerOutOfMemory]
+src/configure.c:439:4: warning: If memory allocation fails, then there is a possible null pointer dereference: opt3 [nullPointerOutOfMemory]
+src/configure.c:439:10: warning: If memory allocation fails, then there is a possible null pointer dereference: element [nullPointerOutOfMemory]
+src/configure.c:439:19: warning: If memory allocation fails, then there is a possible null pointer dereference: opt1 [nullPointerOutOfMemory]
+src/configure.c:439:25: warning: If memory allocation fails, then there is a possible null pointer dereference: opt2 [nullPointerOutOfMemory]
+src/configure.c:502:41: warning: If memory allocation fails, then there is a possible null pointer dereference: opt [nullPointerOutOfMemory]
+src/configure.c:502:46: warning: If memory allocation fails, then there is a possible null pointer dereference: element [nullPointerOutOfMemory]
+src/configure.c:533:36: warning: If memory allocation fails, then there is a possible null pointer dereference: element [nullPointerOutOfMemory]
+src/configure.c:546:4: warning: If memory allocation fails, then there is a possible null pointer dereference: element [nullPointerOutOfMemory]
+src/configure.c:546:13: warning: If memory allocation fails, then there is a possible null pointer dereference: string [nullPointerOutOfMemory]
+src/configure.c:574:4: warning: If memory allocation fails, then there is a possible null pointer dereference: element [nullPointerOutOfMemory]
+src/configure.c:574:13: warning: If memory allocation fails, then there is a possible null pointer dereference: string [nullPointerOutOfMemory]
+src/configure.c:600:32: warning: If memory allocation fails, then there is a possible null pointer dereference: element [nullPointerOutOfMemory]
+src/configure.c:626:46: warning: If memory allocation fails, then there is a possible null pointer dereference: element [nullPointerOutOfMemory]
+src/configure.c:626:55: warning: If memory allocation fails, then there is a possible null pointer dereference: num [nullPointerOutOfMemory]
+src/configure.c:649:4: warning: If memory allocation fails, then there is a possible null pointer dereference: element [nullPointerOutOfMemory]
+src/configure.c:649:13: warning: If memory allocation fails, then there is a possible null pointer dereference: string [nullPointerOutOfMemory]
+src/configure.c:714:9: warning: If memory allocation fails, then there is a possible null pointer dereference: line [nullPointerOutOfMemory]
+src/fakeuser.c:96:6: warning: sscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/fakeuser.c:98:6: warning: sscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/fakeuser.c:100:6: warning: sscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/fakeuser.c:102:6: warning: sscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/fakeuser.c:105:6: warning: sscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/main.c:145:2: warning: sscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/main.c:220:10: warning: If memory allocation fails, then there is a possible null pointer dereference: ident_user [nullPointerOutOfMemory]
+src/main.c:221:10: warning: If memory allocation fails, then there is a possible null pointer dereference: ident_user [nullPointerOutOfMemory]
+src/main.c:220:10: warning: Size of pointer 'ident_user' used instead of size of its data. [pointerSize]
+src/rfc1413.c:38:12: warning: If memory allocation fails, then there is a possible null pointer dereference: bleah [nullPointerOutOfMemory]
+src/search.c:94:8: warning: Using feof() as a loop condition causes the last line to be processed twice. [wrongfeofUsage]
+src/search.c:110:6: warning: sscanf() without field width limits can crash with huge input data. [invalidscanf]
+src/standard.c:306:9: error: Uninitialized struct member: last_tty.time [uninitStructMember]
+src/util.c:610:13: warning: Using feof() as a loop condition causes the last line to be processed twice. [wrongfeofUsage]
+src/util.c:594:8: error: Common realloc mistake: 'result' nulled but not freed upon failure [memleakOnRealloc]
+src/util.c:157:12: warning: If memory allocation fails, then there is a possible null pointer dereference: displine [nullPointerOutOfMemory]
+src/util.c:468:14: warning: If memory allocation fails, then there is a possible null pointer dereference: ret [nullPointerOutOfMemory]

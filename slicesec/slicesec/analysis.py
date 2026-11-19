@@ -220,6 +220,17 @@ class Analysis:
                 for b in ptrs:
                     if a != b and a[:2] == b[:2]:
                         self._add(a, b, "points-to", (self.prof[b].defs or [0])[0])
+        for f, fn, line, ptr, names in getattr(self.index, "stores", ()):     # *p = e: e reaches what p points to
+            t = self.node(f, fn, ptr)
+            for v in names:
+                a = self.node(f, fn, v)
+                if a and v != ptr:
+                    self._add(a, t, "store", line)
+        for f, fn, line, p, q in getattr(self.index, "pointer_copies", ()):   # for (p = q; ..): p aliases q
+            a, b = self.node(f, fn, p), self.node(f, fn, q)
+            if a and b:
+                self._add(b, a, "alias", line)
+                self._add(a, b, "alias", line)
         for c in self.index.calls:      # argument -> parameter, and callee return value -> assigned variable
             if not self._local_call(c):
                 continue

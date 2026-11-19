@@ -131,6 +131,17 @@ class PointsTo(unittest.TestCase):
         self.assertTrue(a.pts.get(("t.c", "f", "n")))
         self.assertIn(("CWE-416", "t.c", 12), found(a))
 
+    def test_copy_through_a_pointer_in_a_loop(self):
+        # cfingerd 1.4.3 (CVE-2001-0609): the ident reply is copied into uname one character at a time through xp,
+        # set in the for header; srcSlice records neither the store nor that alias
+        d = Path(tempfile.mkdtemp())
+        (d / "t.c").write_text("#include <stdio.h>\n#include <syslog.h>\n#include <unistd.h>\nvoid f(int j)\n{\n"
+                               "    char buf[256], uname[64], out[128], *cp, *xp;\n    read(j, buf, 256);\n"
+                               "    cp = buf;\n    for (xp = uname; *cp != 0; cp++)\n        *(xp++) = *cp;\n"
+                               "    snprintf(out, sizeof(out), \"%s\", uname);\n    syslog(LOG_NOTICE, out);\n}\n")
+        a = analyze(d, CACHE)
+        self.assertIn(("CWE-134", "t.c", 12), found(a))
+
 
 class ControlFlowPaths(unittest.TestCase):
     """srcSlice's controledges on the example of Fig. 2 in Alomari et al., JSEP 2014."""

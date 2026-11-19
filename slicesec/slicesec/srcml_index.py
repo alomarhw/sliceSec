@@ -114,6 +114,11 @@ class Index:
     controls: list[Control] = field(default_factory=list)
     exits: dict[str, set[int]] = field(default_factory=dict)   # file -> lines of return / throw statements
     languages: dict[str, str] = field(default_factory=dict)  # file -> srcML language
+    # *p = e, *(p++) = e, *p++ = e: e's value is stored where p points (file, func, line, p, names in e). srcSlice
+    # records no def of p on such a line, so the data written through a pointer would be lost.
+    stores: list[tuple[str, str, int, str, list[str]]] = field(default_factory=list)
+    # p = q in a for header (for (p = buf; ..)): srcSlice records no alias there (file, func, line, p, q)
+    pointer_copies: list[tuple[str, str, int, str, str]] = field(default_factory=list)
 
     def function_at(self, file: str, line: int) -> Function | None:
         """The innermost function whose span holds the line (binary search over start lines)."""
@@ -404,6 +409,29 @@ def build(archive_xml: str) -> Index:
                     idx.calls.append(Call(fname, fname_of(enclosing_function(ex)), _line(ex), "delete",
                                           [_names(rest[0])], {}, None, [txt], set(), False,
                                           _jump_line(ex, parent)))
+
+        # stores through a pointer, and pointer copies in for headers
+        for ex in unit.iter(SRC + "expr"):
+            st = parent.get(ex)
+            if st is None or st.tag not in (SRC + "expr_stmt", SRC + "init"):
+                continue
+            kids = list(ex)
+            eq = next((i for i, k in enumerate(kids) if k.tag == SRC + "operator" and (k.text or "").strip() == "="),
+                      None)
+            if eq is None or eq == 0:
+                continue
+            lhs, rhs = kids[:eq], kids[eq + 1:]
+            if any(k.tag == SRC + "call" for k in rhs):
+                continue                                    # calls are propagators or returns, handled elsewhere
+            fn = fname_of(enclosing_function(ex))
+            lnames = [n for k in lhs for n in _names(k)]
+            rnames = [n for k in rhs for n in _names(k)]
+            if lhs[0].tag == SRC + "operator" and (lhs[0].text or "").strip() == "*" and lnames and rnames:
+                idx.stores.append((fname, fn, _line(ex), lnames[0], rnames))
+            elif st.tag == SRC + "init" and parent.get(parent.get(st)) is not None \
+                    and parent[parent[st]].tag == SRC + "for" and len(lhs) == 1 and lhs[0].tag == SRC + "name" \
+                    and len(rhs) == 1 and rhs[0].tag == SRC + "name" and len(lnames) == 1 and len(rnames) == 1:
+                idx.pointer_copies.append((fname, fn, _line(ex), lnames[0], rnames[0]))
 
         # stream extraction: cin >> a >> b
         for ex in unit.iter(SRC + "expr"):

@@ -32,3 +32,8 @@
   (`*p = ..`, `p[i] = ..`, a copy or input call into p), not a field write (`p->f = ..`). Together these keep
   slices from spreading over most of a program through a shared context struct (tcpdump: median 6 variables).
 - Slice queries group lines by function once, and finding the function of a line is a binary search.
+- Data written through a pointer (`*p = e`, `*(p++) = e`, `*p++ = e`) now reaches what the pointer points to, and a
+  pointer copy in a `for` header (`for (p = buf; ..)`) makes the two alias. srcSlice records neither, so a buffer
+  filled one character at a time through a pointer lost its taint. Found on cfingerd 1.4.3 (CVE-2001-0609), whose
+  ident reply reaches `syslog` this way; the test `test_copy_through_a_pointer_in_a_loop` covers it. Juliet
+  C/C++ 1.3 and the Python suite give the same results as before.

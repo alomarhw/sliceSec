@@ -33,10 +33,18 @@ These are the scripts and outputs behind the numbers in the paper. There are two
 - **Projects:** set `PROJECTS` to a colon-separated list of folders. The paper's projects and their commits are in
   `speed_projects.txt`.
 
-## Walkthrough and figure
+## Fig. 2: cfingerd 1.4.3 and CVE-2001-0609
 
-- `example/` holds the four-file service shown in Fig. 2.
-- `e2e/tests/index.js` drives a real VS Code end to end:
+- `cve/fetch_cfingerd.sh` downloads cfingerd 1.4.3 and Debian's security fix from snapshot.debian.org, checks
+  their SHA-1 hashes, and unpacks `vulnerable/` and `fixed/`. Nothing in them is built or run.
+- `cve/cfingerd_tools.txt` holds the output of sliceSec, flawfinder and Cppcheck on both versions.
+- `figure/figure.py` takes the screenshot. It drives a real VS Code, with sliceSec installed from its VSIX
+  (`cd extension && npx @vscode/vsce package --no-dependencies`), through its remote debugging port with
+  Playwright, using keys, the command palette and the mouse. `figure/User/` holds the profile's settings and
+  key bindings; set `slicesec.backendPath` to this repository's `slicesec` folder.
+
+## End-to-end test
+
+- `example/` holds a four-file service, and `e2e/tests/index.js` drives a real VS Code end to end on it:
   `code --extensionDevelopmentPath=../extension --extensionTestsPath=$PWD/e2e/tests example`.
-- `shot/` holds the harness that produced Fig. 2, which captures VS Code through its DevTools port
-  (`--remote-debugging-port`).
+- `shot/` holds the harness of an earlier version of Fig. 2.

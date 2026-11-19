@@ -1,0 +1,4 @@
+[
+ { "key": "ctrl+alt+shift+j", "command": "scrollLineDown", "when": "editorTextFocus" },
+ { "key": "ctrl+alt+shift+k", "command": "scrollLineUp", "when": "editorTextFocus" }
+]
