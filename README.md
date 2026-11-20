@@ -29,9 +29,13 @@ The code being analyzed is never compiled or run, so code that does not build ca
    ```
 3. Optional, for pointer analysis: build the extended srcPtr in `srcptr/` (see `srcptr/ENHANCEMENTS.md`) and put
    `srcptr` on `PATH`. Without it, aliases come from srcSlice's pointer copies only.
-4. Install the analysis package. It needs Python 3.10 or later and has no dependencies: `pip install ./slicesec`.
-5. Install the extension. Open `extension/` in VS Code and press F5, or package it with `npx @vscode/vsce package`
-   and run `code --install-extension slicesec-0.2.0.vsix`.
+4. Install the extension. Download `slicesec-0.2.0.vsix` from the
+   [Releases page](https://github.com/alomarhw/sliceSec/releases) and run
+   `code --install-extension slicesec-0.2.0.vsix`, or in VS Code use *Extensions > ... > Install from VSIX*.
+   The analysis package is inside the `.vsix`. It needs Python 3.10 or later as `python3` on `PATH`, or set
+   `slicesec.pythonPath`.
+5. Optional, for the command line: `pip install ./slicesec` (no dependencies). To build the `.vsix` yourself, run
+   `extension/package.sh`.
 
 ## Layout
 
