@@ -2,7 +2,7 @@
   "name": "slicesec",
   "displayName": "sliceSec: srcSlice slices and taint paths",
   "description": "Forward slices from srcSlice, taint paths and vulnerability findings for C, C++ and Python, in the editor",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "publisher": "slicesec",
   "license": "GPL-3.0-only",
   "repository": { "type": "git", "url": "https://github.com/alomarhw/sliceSec" },

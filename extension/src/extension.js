@@ -11,6 +11,7 @@ const readline = require('readline');
 const LANGS = ['c', 'cpp', 'python'];
 let server = null, out = null, diags = null, deco = null, tree = null, status = null;
 let findings = [];
+let analyzed = false;   // the first analysis has started (on activation, on opening a file, on save or by command)
 
 // ---- server ---------------------------------------------------------------------------------------------
 class Server {
@@ -88,6 +89,7 @@ function wordAtCursor() {
 
 // ---- findings -> Problems panel -------------------------------------------------------------------------
 async function analyzeWorkspace(uri) {
+  analyzed = true;
   const s = await ensureServer(uri);
   const t = Date.now();
   const res = await s.call('analyze');
@@ -235,9 +237,14 @@ function activate(context) {
       }
     })),
     { dispose: () => server && server.stop() });
-  const ed = vscode.window.activeTextEditor;
-  if (ed && LANGS.includes(ed.document.languageId) && vscode.workspace.getConfiguration('slicesec').get('analyzeOnSave'))
-    guard(() => analyzeWorkspace(ed.document.uri))();
+  // Analyze when the first C, C++ or Python file is shown. sliceSec can activate before any such file is open, for
+  // example when its view is visible at startup, so this also listens for the first such editor.
+  const first = (ed) => {
+    if (!analyzed && ed && LANGS.includes(ed.document.languageId) && vscode.workspace.getConfiguration('slicesec').get('analyzeOnSave'))
+      guard(() => analyzeWorkspace(ed.document.uri))();
+  };
+  context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(first));
+  first(vscode.window.activeTextEditor);
   // read-only view of the state, for the end-to-end test
   return { state: () => ({ findings, root: server && server.root, tree: tree.title, items: tree.items.map(i => i.label),
     shown: Object.fromEntries(Object.entries(shown).map(([k, m]) => [k, Object.fromEntries([...m].map(([f, rs]) => [f, rs.map(r => (r.range || r).start.line + 1)]))])) }) };

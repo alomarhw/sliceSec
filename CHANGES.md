@@ -1,5 +1,11 @@
 # Changes
 
+## 0.2.1
+- The extension analyzes the workspace when the first C, C++ or Python file is shown, also when it was activated
+  before any such file was open (for example because the Slice and Taint Path view was expanded at startup). Before,
+  the first analysis then waited for a save or for *sliceSec: Analyze Workspace*. The analysis package is unchanged
+  from 0.2.0.
+
 ## Since v1-eval (the version evaluated in the paper)
 - `break`, `continue` and `goto` after a `free` no longer end the use-after-free and double-free search. Only
   `return`, `throw` and calls that do not return end it. Juliet flow variants 12, 15, 16 and 18 showed the
