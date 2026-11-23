@@ -3,9 +3,9 @@
   "CWE78_OS_Command_Injection": {
    "cases": 4800,
    "seconds": {
-    "sliceSec": 177.0,
-    "flawfinder": 14.2,
-    "cppcheck": 38.2
+    "sliceSec": 158.7,
+    "flawfinder": 14.1,
+    "cppcheck": 36.3
    },
    "sliceSec": {
     "detected": 1468,
@@ -29,9 +29,9 @@
   "CWE134_Uncontrolled_Format_String": {
    "cases": 2880,
    "seconds": {
-    "sliceSec": 133.6,
-    "flawfinder": 12.0,
-    "cppcheck": 40.2
+    "sliceSec": 120.6,
+    "flawfinder": 12.2,
+    "cppcheck": 39.8
    },
    "sliceSec": {
     "detected": 1521,
@@ -55,8 +55,8 @@
   "CWE415_Double_Free": {
    "cases": 960,
    "seconds": {
-    "sliceSec": 44.0,
-    "flawfinder": 2.3,
+    "sliceSec": 42.2,
+    "flawfinder": 2.4,
     "cppcheck": 4.2
    },
    "sliceSec": {
@@ -81,7 +81,7 @@
   "CWE416_Use_After_Free": {
    "cases": 458,
    "seconds": {
-    "sliceSec": 18.0,
+    "sliceSec": 16.6,
     "flawfinder": 1.1,
     "cppcheck": 2.1
    },

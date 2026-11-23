@@ -1,8 +1,8 @@
 # Intel(R) Xeon(R) W-2140B CPU @ 3.20GHz, 32 GB, macOS 15.8.3, Python 3.12.2; {'srcptr': 'srcPtr (sliceSec fork, Andersen)', 'srcml': 'srcml: 1.1.0', 'srcslice': 'srcSlice 1.1.0'}
 project files LOC | srcML s | srcSlice s | index+graph s | rules s | first analysis s | unchanged save s | save after an edit s | profiles edges findings | slice query | taint query
-tcpdump 245 118112 | 1.0 | 1.6 | 6.1 | 0.40 | 13.5 | 0.014 (same=True) | 14.1 | 8022 40621 0 | median 0.5 ms, p95 170.0 ms | median 0.0 ms, p95 0.0 ms | skipped []
-libxml2 218 214578 | 2.5 | 2.9 | 15.3 | 0.52 | 46.0 | 0.028 (same=True) | 47.1 | 19234 116859 28 | median 383.8 ms, p95 406.5 ms | median 0.0 ms, p95 0.0 ms | skipped []
-libtiff 155 124394 | 1.8 | 1.7 | 9.3 | 0.36 | 21.2 | 0.008 (same=True) | 21.2 | 12287 87514 71 | median 1.2 ms, p95 235.0 ms | median 0.0 ms, p95 0.0 ms | skipped []
-openjpeg 322 262867 | 94.4 | 2.6 | 16.2 | 0.66 | 59.2 | 0.012 (same=True) | 60.8 | 27555 128073 128 | median 0.4 ms, p95 346.2 ms | median 0.0 ms, p95 0.0 ms | skipped ['thirdparty/libz/deflate.c']
-curl 1100 313583 | 277.7 | 3.5 | 18.5 | 0.95 | 98.3 | 0.045 (same=True) | 102.3 | 38602 166394 32 | median 0.4 ms, p95 494.4 ms | median 0.0 ms, p95 0.0 ms | skipped ['docs/examples/log_failed_transfers.c']
-pip (Python) 487 182476 | 1.2 | 1.6 | 11.4 | 0.36 | 23.6 | 0.017 (same=True) | 23.0 | 23626 126767 42 | median 0.2 ms, p95 148.1 ms | median 0.0 ms, p95 0.0 ms | skipped []
+tcpdump 245 118112 | 1.1 | 1.5 | 6.5 | 0.36 | 13.9 | 0.014 (same=True) | 14.4 | 8022 40724 0 | median 0.5 ms, p95 176.7 ms | median 0.0 ms, p95 0.0 ms | skipped []
+libxml2 218 214578 | 2.7 | 3.0 | 16.0 | 0.53 | 48.2 | 0.027 (same=True) | 49.1 | 19234 117269 28 | median 400.8 ms, p95 422.3 ms | median 0.0 ms, p95 0.0 ms | skipped []
+libtiff 155 124394 | 1.9 | 1.8 | 9.9 | 0.39 | 22.4 | 0.009 (same=True) | 22.5 | 12287 88414 71 | median 1.2 ms, p95 237.1 ms | median 0.0 ms, p95 0.0 ms | skipped []
+openjpeg 322 262867 | 93.9 | 2.6 | 16.7 | 0.66 | 60.7 | 0.012 (same=True) | 62.4 | 27555 129833 128 | median 0.4 ms, p95 349.2 ms | median 0.0 ms, p95 0.0 ms | skipped ['thirdparty/libz/deflate.c']
+curl 1100 313583 | 267.7 | 3.6 | 19.8 | 0.97 | 102.4 | 0.061 (same=True) | 103.6 | 38602 167324 32 | median 0.4 ms, p95 515.0 ms | median 0.0 ms, p95 0.0 ms | skipped ['docs/examples/log_failed_transfers.c']
+pip (Python) 487 182476 | 1.3 | 1.7 | 12.4 | 0.36 | 25.1 | 0.019 (same=True) | 24.2 | 23626 126767 42 | median 0.3 ms, p95 151.9 ms | median 0.0 ms, p95 0.0 ms | skipped []
