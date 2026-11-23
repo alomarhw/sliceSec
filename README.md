@@ -18,6 +18,10 @@ The slices come from [srcSlice](https://github.com/srcML/srcSlice), and the code
 
 The code being analyzed is never compiled or run, so code that does not build can still be analyzed.
 
+**Demo video** (4:42): [youtu.be/bCLmh22EXXA](https://youtu.be/bCLmh22EXXA). It follows the format string flaw
+CVE-2001-0609 in cfingerd 1.4.3 from the remote reply to `syslog`, shows the other CWEs found in cfingerd and the
+Python findings, and runs the command line and CI checks.
+
 ## Install
 
 1. Install srcML 1.1 (`brew install srcml`, or see srcml.org).
